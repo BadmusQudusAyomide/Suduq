@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { PanelsTopLeft, Menu, ChevronDown } from 'lucide-react';
-import { categories, imageTools, textTools } from '../lib/tool-registry';
+import { categories, imageTools, textTools, videoTools } from '../lib/tool-registry';
+import { useRecentTools } from '../hooks/useRecentTools';
+import { useFavoritesTools } from '../hooks/useFavoritesTools';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Separator } from './ui/separator';
@@ -30,13 +32,34 @@ import {
   SheetTrigger
 } from './ui/sheet';
 
+function ToolLink({ tool, onClick, className = '' }) {
+  return (
+    <NavLink
+      to={tool.path}
+      onClick={onClick}
+      className={({ isActive }) =>
+        [
+          'block rounded-md px-3 py-2 text-sm transition-colors',
+          isActive ? 'bg-primary text-primary-foreground' : 'hover:bg-accent hover:text-accent-foreground',
+          className
+        ].join(' ')
+      }
+    >
+      {tool.label}
+    </NavLink>
+  );
+}
+
 export default function AppShell() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const recentTools = useRecentTools(location.pathname);
+  const { favoriteTools } = useFavoritesTools();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <div className="mx-auto flex min-h-screen w-full max-w-7xl gap-6 px-4 py-4 lg:px-6">
+      <div className="mx-auto flex min-h-screen w-full max-w-7xl gap-4 px-3 py-3 sm:px-4 lg:gap-6 lg:px-6">
         <aside className="hidden w-72 shrink-0 lg:block">
           <div className="sticky top-4 space-y-4">
             <Card>
@@ -75,18 +98,7 @@ export default function AppShell() {
                     Quick access
                   </p>
                   {imageTools.map((tool) => (
-                    <NavLink
-                      key={tool.key}
-                      to={tool.path}
-                      className={({ isActive }) =>
-                        [
-                          'block rounded-md px-3 py-2 text-sm transition-colors',
-                          isActive ? 'bg-primary text-primary-foreground' : 'hover:bg-accent hover:text-accent-foreground'
-                        ].join(' ')
-                      }
-                    >
-                      {tool.label}
-                    </NavLink>
+                    <ToolLink key={tool.path} tool={tool} />
                   ))}
                 </div>
                 <Separator />
@@ -95,20 +107,41 @@ export default function AppShell() {
                     Text tools
                   </p>
                   {textTools.slice(0, 4).map((tool) => (
-                    <NavLink
-                      key={tool.key}
-                      to={tool.path}
-                      className={({ isActive }) =>
-                        [
-                          'block rounded-md px-3 py-2 text-sm transition-colors',
-                          isActive ? 'bg-primary text-primary-foreground' : 'hover:bg-accent hover:text-accent-foreground'
-                        ].join(' ')
-                      }
-                    >
-                      {tool.label}
-                    </NavLink>
+                    <ToolLink key={tool.path} tool={tool} />
                   ))}
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm">Recent tools</CardTitle>
+                <CardDescription>Your latest tool pages in one place.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2 pt-0">
+                {recentTools.length ? (
+                  recentTools.map((tool) => <ToolLink key={tool.path} tool={tool} className="border" />)
+                ) : (
+                  <div className="rounded-md border border-dashed px-3 py-4 text-sm text-muted-foreground">
+                    Open a few tools and they’ll show up here.
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm">Favorites</CardTitle>
+                <CardDescription>Your starred tools.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2 pt-0">
+                {favoriteTools.length ? (
+                  favoriteTools.map((tool) => <ToolLink key={tool.path} tool={tool} className="border" />)
+                ) : (
+                  <div className="rounded-md border border-dashed px-3 py-4 text-sm text-muted-foreground">
+                    Star a tool to keep it here.
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -140,12 +173,14 @@ export default function AppShell() {
 
         <main className="flex min-w-0 flex-1 flex-col gap-4">
           <header className="rounded-xl border bg-card px-4 py-4 shadow-sm lg:px-6">
-            <div className="flex items-center justify-between gap-4">
-              <div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+              <div className="min-w-0">
                 <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
                   Browser utility suite
                 </p>
-                <h1 className="mt-1 text-2xl font-semibold tracking-tight">Suduq, built for quick work.</h1>
+                <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
+                  Suduq, built for quick work.
+                </h1>
               </div>
               <div className="hidden items-center gap-2 md:flex">
                 <DropdownMenu>
@@ -159,13 +194,19 @@ export default function AppShell() {
                     <DropdownMenuLabel>Jump to tools</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     {imageTools.map((tool) => (
-                      <DropdownMenuItem key={tool.key} onSelect={() => navigate(tool.path)}>
+                      <DropdownMenuItem key={tool.path} onSelect={() => navigate(tool.path)}>
                         {tool.label}
                       </DropdownMenuItem>
                     ))}
                     <DropdownMenuSeparator />
                     {textTools.slice(0, 4).map((tool) => (
-                      <DropdownMenuItem key={tool.key} onSelect={() => navigate(tool.path)}>
+                      <DropdownMenuItem key={tool.path} onSelect={() => navigate(tool.path)}>
+                        {tool.label}
+                      </DropdownMenuItem>
+                    ))}
+                    <DropdownMenuSeparator />
+                    {videoTools.map((tool) => (
+                      <DropdownMenuItem key={tool.path} onSelect={() => navigate(tool.path)}>
                         {tool.label}
                       </DropdownMenuItem>
                     ))}
@@ -180,7 +221,7 @@ export default function AppShell() {
                     <DialogHeader>
                       <DialogTitle>About Suduq</DialogTitle>
                       <DialogDescription>
-                        A fast utility workspace for image, text, dev, AI, and everyday tools, built by
+                        A fast utility workspace for image, text, dev, video, and everyday tools, built by
                         Qudus.
                       </DialogDescription>
                     </DialogHeader>
@@ -193,15 +234,16 @@ export default function AppShell() {
                 </Dialog>
               </div>
             </div>
+
             <div className="mt-4 flex items-center justify-between gap-3 lg:hidden">
               <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" className="shrink-0">
                     <Menu size={16} />
                     Menu
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left">
+                <SheetContent side="left" className="w-[92vw] max-w-sm overflow-y-auto">
                   <SheetHeader>
                     <div className="flex items-center gap-3">
                       <img
@@ -223,7 +265,7 @@ export default function AppShell() {
                     </NavLink>
                     {imageTools.map((tool) => (
                       <NavLink
-                        key={tool.key}
+                        key={tool.path}
                         to={tool.path}
                         onClick={() => setMobileOpen(false)}
                         className="block rounded-md border px-3 py-2 text-sm"
@@ -233,7 +275,17 @@ export default function AppShell() {
                     ))}
                     {textTools.slice(0, 4).map((tool) => (
                       <NavLink
-                        key={tool.key}
+                        key={tool.path}
+                        to={tool.path}
+                        onClick={() => setMobileOpen(false)}
+                        className="block rounded-md border px-3 py-2 text-sm"
+                      >
+                        {tool.label}
+                      </NavLink>
+                    ))}
+                    {videoTools.map((tool) => (
+                      <NavLink
+                        key={tool.path}
                         to={tool.path}
                         onClick={() => setMobileOpen(false)}
                         className="block rounded-md border px-3 py-2 text-sm"
@@ -242,13 +294,63 @@ export default function AppShell() {
                       </NavLink>
                     ))}
                   </div>
+
+                  <div className="mt-6 space-y-3">
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                        Recent tools
+                      </p>
+                      <div className="mt-2 space-y-2">
+                        {recentTools.length ? (
+                          recentTools.map((tool) => (
+                            <NavLink
+                              key={tool.path}
+                              to={tool.path}
+                              onClick={() => setMobileOpen(false)}
+                              className="block rounded-md border px-3 py-2 text-sm"
+                            >
+                              {tool.label}
+                            </NavLink>
+                          ))
+                        ) : (
+                          <div className="rounded-md border border-dashed px-3 py-3 text-sm text-muted-foreground">
+                            Open a few tools to see them here.
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                        Favorites
+                      </p>
+                      <div className="mt-2 space-y-2">
+                        {favoriteTools.length ? (
+                          favoriteTools.map((tool) => (
+                            <NavLink
+                              key={tool.path}
+                              to={tool.path}
+                              onClick={() => setMobileOpen(false)}
+                              className="block rounded-md border px-3 py-2 text-sm"
+                            >
+                              {tool.label}
+                            </NavLink>
+                          ))
+                        ) : (
+                          <div className="rounded-md border border-dashed px-3 py-3 text-sm text-muted-foreground">
+                            Star a tool to keep it here.
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </SheetContent>
               </Sheet>
 
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {imageTools.map((tool) => (
                   <NavLink
-                    key={tool.key}
+                    key={tool.path}
                     to={tool.path}
                     className="shrink-0 rounded-md border px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
                   >

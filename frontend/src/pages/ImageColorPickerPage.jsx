@@ -1,51 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+﻿import { useEffect, useMemo, useRef, useState } from 'react';
 import { Copy, Upload, Pipette } from 'lucide-react';
 import { toast } from 'sonner';
 import ToolShell from '../components/ToolShell';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
-import { Badge } from '../components/ui/badge';
 import { getImageSpecialPageConfig } from '../lib/tool-page-configs';
-
-function rgbToHex(r, g, b) {
-  return `#${[r, g, b]
-    .map((value) => value.toString(16).padStart(2, '0'))
-    .join('')}`;
-}
-
-function formatRgb(color) {
-  return `rgb(${color.r}, ${color.g}, ${color.b})`;
-}
-
-function extractPalette(imageData, limit = 6) {
-  const buckets = new Map();
-  const { data } = imageData;
-
-  for (let index = 0; index < data.length; index += 4) {
-    const alpha = data[index + 3];
-    if (alpha < 32) {
-      continue;
-    }
-
-    const r = Math.round(data[index] / 32) * 32;
-    const g = Math.round(data[index + 1] / 32) * 32;
-    const b = Math.round(data[index + 2] / 32) * 32;
-    const key = `${r},${g},${b}`;
-    buckets.set(key, (buckets.get(key) || 0) + 1);
-  }
-
-  return [...buckets.entries()]
-    .sort((left, right) => right[1] - left[1])
-    .slice(0, limit)
-    .map(([key, count]) => {
-      const [r, g, b] = key.split(',').map(Number);
-      return {
-        hex: rgbToHex(r, g, b),
-        rgb: { r, g, b },
-        count
-      };
-    });
-}
+import { copyText, extractPalette, formatRgb, rgbToHex } from '../lib/tool-utils';
 
 const config = getImageSpecialPageConfig('color-picker');
 
@@ -132,7 +92,7 @@ export default function ImageColorPickerPage() {
   };
 
   const copyValue = async (value) => {
-    await navigator.clipboard.writeText(value);
+    await copyText(value);
     setCopied(value);
     toast.success('Color copied to clipboard');
     window.setTimeout(() => setCopied(''), 1200);

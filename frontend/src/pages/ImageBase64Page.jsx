@@ -1,10 +1,11 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Copy, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import ToolShell from '../components/ToolShell';
 import { Button } from '../components/ui/button';
 import { Textarea } from '../components/ui/textarea';
 import { getImageSpecialPageConfig } from '../lib/tool-page-configs';
+import { copyText, readFileAsDataUrl } from '../lib/tool-utils';
 
 const config = getImageSpecialPageConfig('base64');
 
@@ -17,9 +18,9 @@ export default function ImageBase64Page() {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => setValue(String(reader.result || ''));
-    reader.readAsDataURL(file);
+    readFileAsDataUrl(file)
+      .then(setValue)
+      .catch(() => {});
   };
 
   const copyValue = async () => {
@@ -27,7 +28,7 @@ export default function ImageBase64Page() {
       return;
     }
 
-    await navigator.clipboard.writeText(value);
+    await copyText(value);
     setCopied(true);
     toast.success('Base64 copied to clipboard');
     window.setTimeout(() => setCopied(false), 1500);

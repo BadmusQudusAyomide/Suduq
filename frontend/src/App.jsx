@@ -17,6 +17,7 @@ import UrlToolsPage from './pages/UrlToolsPage';
 import PasswordGeneratorPage from './pages/PasswordGeneratorPage';
 import UuidGeneratorPage from './pages/UuidGeneratorPage';
 import HashGeneratorPage from './pages/HashGeneratorPage';
+import VideoDownloaderPage from './pages/VideoDownloaderPage';
 import NotFound from './pages/NotFound';
 
 function ScrollToTop() {
@@ -57,6 +58,10 @@ export default function App() {
               <Route path="password" element={<PasswordGeneratorPage />} />
               <Route path="uuid" element={<UuidGeneratorPage />} />
               <Route path="hash" element={<HashGeneratorPage />} />
+            </Route>
+            <Route path="video">
+              <Route index element={<Navigate to="/tools/video/youtube" replace />} />
+              <Route path=":platform" element={<VideoDownloaderPage />} />
             </Route>
           </Route>
         </Route>

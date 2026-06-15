@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { Download, LoaderCircle, RefreshCcw, Upload } from 'lucide-react';
 import BeforeAfterSlider from '../components/BeforeAfterSlider';
 import ToolShell from '../components/ToolShell';
@@ -7,17 +7,7 @@ import { getImageSpecialPageConfig } from '../lib/tool-page-configs';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
-
-function formatFileSize(bytes) {
-  if (!bytes && bytes !== 0) return '';
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-function fileLabel(name) {
-  return name.replace(/\.[^.]+$/, '');
-}
+import { formatFileSize, getFileStem } from '../lib/tool-utils';
 
 const config = getImageSpecialPageConfig('remove-bg');
 
@@ -66,7 +56,7 @@ export default function ImageRemoveBackgroundPage() {
       const blob = await processImage('/api/images/remove-bg', file);
       const url = URL.createObjectURL(blob);
       setAfterUrl(url);
-      setResultName(`suduq-${fileLabel(file.name)}-no-bg.png`);
+      setResultName(`suduq-${getFileStem(file.name)}-no-bg.png`);
     } catch (err) {
       setError(err.message || 'Something went wrong.');
     } finally {

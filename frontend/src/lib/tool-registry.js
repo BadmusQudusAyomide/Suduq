@@ -2,6 +2,7 @@ export {
   categories,
   imageTools,
   textTools,
+  videoTools,
   toolRegistry,
   highlights,
   getToolByKey,

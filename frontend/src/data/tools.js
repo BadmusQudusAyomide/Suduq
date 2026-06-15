@@ -1,4 +1,4 @@
-import { Image, FileType2, ScanText, Hash, Sparkles } from 'lucide-react';
+import { Image, FileType2, ScanText, Hash, Sparkles, Clapperboard } from 'lucide-react';
 
 const defaultOutput = (label) => [
   {
@@ -201,6 +201,12 @@ export const categories = [
     label: 'Utility Tools',
     icon: FileType2,
     description: 'QR codes, passwords, UUIDs, timestamps, and file sizes.'
+  },
+  {
+    key: 'video',
+    label: 'Video Tools',
+    icon: Clapperboard,
+    description: 'Download-ready sections for social media video workflows.'
   }
 ];
 
@@ -390,7 +396,82 @@ export const textTools = [
   )
 ];
 
-export const toolRegistry = [...imageTools, ...textTools];
+export const videoTools = [
+  createTool(
+    {
+      key: 'youtube',
+      label: 'YouTube Downloader',
+      description: 'Paste a YouTube link and prepare a downloadable video flow.',
+      path: '/tools/video/youtube'
+    },
+    'video',
+    'server',
+    [],
+    defaultOutput('Video file')
+  ),
+  createTool(
+    {
+      key: 'tiktok',
+      label: 'TikTok Downloader',
+      description: 'Download TikTok clips from a shared link.',
+      path: '/tools/video/tiktok'
+    },
+    'video',
+    'server',
+    [],
+    defaultOutput('Video file')
+  ),
+  createTool(
+    {
+      key: 'instagram',
+      label: 'Instagram Downloader',
+      description: 'Save Instagram reels and video posts.',
+      path: '/tools/video/instagram'
+    },
+    'video',
+    'server',
+    [],
+    defaultOutput('Video file')
+  ),
+  createTool(
+    {
+      key: 'facebook',
+      label: 'Facebook Downloader',
+      description: 'Grab public Facebook video links for offline use.',
+      path: '/tools/video/facebook'
+    },
+    'video',
+    'server',
+    [],
+    defaultOutput('Video file')
+  ),
+  createTool(
+    {
+      key: 'x',
+      label: 'X Downloader',
+      description: 'Download public X video posts from a URL.',
+      path: '/tools/video/x'
+    },
+    'video',
+    'server',
+    [],
+    defaultOutput('Video file')
+  ),
+  createTool(
+    {
+      key: 'linkedin',
+      label: 'LinkedIn Downloader',
+      description: 'Save LinkedIn video posts into a usable file flow.',
+      path: '/tools/video/linkedin'
+    },
+    'video',
+    'server',
+    [],
+    defaultOutput('Video file')
+  )
+];
+
+export const toolRegistry = [...imageTools, ...textTools, ...videoTools];
 
 export const highlights = [
   {

@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
 import { Search } from 'lucide-react';
-import { categories, imageTools, textTools, searchTools } from '../lib/tool-registry';
+import { categories, imageTools, textTools, videoTools, searchTools } from '../lib/tool-registry';
 import ToolCard from '../components/ToolCard';
 import { Badge } from '../components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Input } from '../components/ui/input';
+import { useFavoritesTools } from '../hooks/useFavoritesTools';
 
 const sections = [
   {
@@ -18,11 +19,18 @@ const sections = [
     title: 'Text Tools',
     description: 'Writing, formatting, hashing, and utility text workflows.',
     items: textTools
+  },
+  {
+    key: 'video',
+    title: 'Video Tools',
+    description: 'Sectioned download-ready workflows for social media videos.',
+    items: videoTools
   }
 ];
 
 export default function Dashboard() {
   const [query, setQuery] = useState('');
+  const { favoriteTools, favoriteCount, isFavorite, toggleFavorite } = useFavoritesTools();
 
   const filteredSections = useMemo(() => {
     const visibleTools = searchTools(query);
@@ -36,6 +44,10 @@ export default function Dashboard() {
   }, [query]);
 
   const totalCount = filteredSections.reduce((count, section) => count + section.items.length, 0);
+  const visibleFavorites = useMemo(() => {
+    const visibleTools = searchTools(query);
+    return favoriteTools.filter((tool) => visibleTools.some((item) => item.path === tool.path));
+  }, [favoriteTools, query]);
 
   return (
     <div className="grid gap-4">
@@ -71,6 +83,30 @@ export default function Dashboard() {
         </CardHeader>
       </Card>
 
+      {visibleFavorites.length ? (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <CardTitle className="text-xl">Favorites</CardTitle>
+                <CardDescription>Your starred tools, ready to open again.</CardDescription>
+              </div>
+              <Badge variant="secondary">{favoriteCount}</Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {visibleFavorites.map((tool) => (
+              <ToolCard
+                key={tool.path}
+                tool={tool}
+                isFavorite={isFavorite(tool.path)}
+                onToggleFavorite={toggleFavorite}
+              />
+            ))}
+          </CardContent>
+        </Card>
+      ) : null}
+
       <div className="grid gap-4 xl:grid-cols-[1fr_1fr]">
         {filteredSections.map((section) => {
           const category = categories.find((item) => item.key === section.key);
@@ -91,9 +127,14 @@ export default function Dashboard() {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="grid gap-4">
+              <CardContent className="grid gap-4 md:grid-cols-2">
                 {section.items.map((tool) => (
-                  <ToolCard key={tool.key} tool={tool} />
+                  <ToolCard
+                    key={tool.path}
+                    tool={tool}
+                    isFavorite={isFavorite(tool.path)}
+                    onToggleFavorite={toggleFavorite}
+                  />
                 ))}
               </CardContent>
             </Card>
