@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Copy, Upload, Pipette } from 'lucide-react';
 import { toast } from 'sonner';
+import ToolShell from '../components/ToolShell';
 import { Button } from '../components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Input } from '../components/ui/input';
+import { Badge } from '../components/ui/badge';
+import { getImageSpecialPageConfig } from '../lib/tool-page-configs';
 
 function rgbToHex(r, g, b) {
   return `#${[r, g, b]
@@ -44,6 +46,8 @@ function extractPalette(imageData, limit = 6) {
       };
     });
 }
+
+const config = getImageSpecialPageConfig('color-picker');
 
 export default function ImageColorPickerPage() {
   const canvasRef = useRef(null);
@@ -87,7 +91,7 @@ export default function ImageColorPickerPage() {
       try {
         const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
         setPalette(extractPalette(imageData));
-      } catch (error) {
+      } catch {
         setPalette([]);
       }
     };
@@ -146,18 +150,14 @@ export default function ImageColorPickerPage() {
   }, [selectedColor]);
 
   return (
-    <section className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
-      <Card>
-        <CardHeader>
-          <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-            Image tools
-          </p>
-          <CardTitle>Color Picker from Image</CardTitle>
-          <CardDescription>
-            Upload an image, click any pixel, and pull out a useful palette.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
+    <ToolShell
+      categoryLabel="Image tools"
+      title={config.title}
+      description={config.description}
+      rightTitle={config.rightTitle}
+      rightDescription={config.rightDescription}
+      leftChildren={
+        <>
           <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed bg-muted/30 px-6 py-10 text-center transition-colors hover:bg-muted/60">
             <Upload className="mb-3 text-muted-foreground" size={26} />
             <span className="font-medium">Upload an image</span>
@@ -185,22 +185,18 @@ export default function ImageColorPickerPage() {
             )}
           </div>
           <canvas ref={canvasRef} className="hidden" />
-        </CardContent>
-      </Card>
-
-      <div className="grid gap-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Selected color</CardTitle>
-            <CardDescription>Click the image to sample a pixel color.</CardDescription>
-          </CardHeader>
-          <CardContent>
+        </>
+      }
+      rightChildren={
+        <div className="grid gap-4">
+          <div className="rounded-lg border bg-background p-4">
+            <div className="mb-3">
+              <p className="text-sm font-medium">Selected color</p>
+              <p className="text-sm text-muted-foreground">Click the image to sample a pixel color.</p>
+            </div>
             {summary ? (
               <div className="space-y-4">
-                <div
-                  className="h-36 rounded-xl border"
-                  style={{ backgroundColor: summary.hex }}
-                />
+                <div className="h-36 rounded-xl border" style={{ backgroundColor: summary.hex }} />
                 <div className="space-y-2 text-sm">
                   <p className="font-medium">HEX: {summary.hex}</p>
                   <p className="text-muted-foreground">RGB: {summary.rgb}</p>
@@ -224,42 +220,42 @@ export default function ImageColorPickerPage() {
                 </div>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Palette</CardTitle>
-            <CardDescription>Approximate dominant colors extracted from the image.</CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-3">
-            {palette.length ? (
-              palette.map((color) => (
-                <button
-                  key={color.hex}
-                  type="button"
-                  onClick={() => copyValue(color.hex)}
-                  className="flex items-center gap-3 rounded-lg border p-2 text-left transition-colors hover:bg-muted/40"
-                >
-                  <span
-                    className="h-12 w-12 shrink-0 rounded-md border"
-                    style={{ backgroundColor: color.hex }}
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium">{color.hex}</p>
-                    <p className="text-xs text-muted-foreground">{formatRgb(color.rgb)}</p>
-                  </div>
-                  <span className="text-xs text-muted-foreground">{color.count}</span>
-                </button>
-              ))
-            ) : (
-              <div className="grid min-h-40 place-items-center rounded-lg border border-dashed bg-muted/30 text-sm text-muted-foreground">
-                Palette will appear after you upload an image
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    </section>
+          <div className="rounded-lg border bg-background p-4">
+            <div className="mb-3">
+              <p className="text-sm font-medium">Palette</p>
+              <p className="text-sm text-muted-foreground">Approximate dominant colors extracted from the image.</p>
+            </div>
+            <div className="grid gap-3">
+              {palette.length ? (
+                palette.map((color) => (
+                  <button
+                    key={color.hex}
+                    type="button"
+                    onClick={() => copyValue(color.hex)}
+                    className="flex items-center gap-3 rounded-lg border p-2 text-left transition-colors hover:bg-muted/40"
+                  >
+                    <span
+                      className="h-12 w-12 shrink-0 rounded-md border"
+                      style={{ backgroundColor: color.hex }}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium">{color.hex}</p>
+                      <p className="text-xs text-muted-foreground">{formatRgb(color.rgb)}</p>
+                    </div>
+                    <span className="text-xs text-muted-foreground">{color.count}</span>
+                  </button>
+                ))
+              ) : (
+                <div className="grid min-h-40 place-items-center rounded-lg border border-dashed bg-muted/30 text-sm text-muted-foreground">
+                  Palette will appear after you upload an image
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      }
+    />
   );
 }
