@@ -123,7 +123,7 @@ export default function AppShell() {
                   recentTools.map((tool) => <ToolLink key={tool.path} tool={tool} className="border" />)
                 ) : (
                   <div className="rounded-md border border-dashed px-3 py-4 text-sm text-muted-foreground">
-                    Open a few tools and they’ll show up here.
+                    Open a few tools and they'll show up here.
                   </div>
                 )}
               </CardContent>
@@ -253,7 +253,7 @@ export default function AppShell() {
                       />
                       <SheetTitle>Suduq</SheetTitle>
                     </div>
-                    <SheetDescription>Navigate the current workspace and image tools.</SheetDescription>
+                    <SheetDescription>Navigate tools, recent items, favorites, and the current workspace.</SheetDescription>
                   </SheetHeader>
                   <div className="mt-6 space-y-2">
                     <NavLink
@@ -369,3 +369,4 @@ export default function AppShell() {
     </div>
   );
 }
+
