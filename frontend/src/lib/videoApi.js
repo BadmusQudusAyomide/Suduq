@@ -1,3 +1,5 @@
+import { apiUrl } from './api-base';
+
 function parseResponseError(message) {
   let errorMessage = message || 'Video download failed';
 
@@ -17,7 +19,7 @@ async function readError(response) {
 }
 
 async function requestJson(url, options) {
-  const response = await fetch(url, options);
+  const response = await fetch(apiUrl(url), options);
 
   if (!response.ok) {
     throw new Error(await readError(response));
@@ -47,7 +49,7 @@ export async function cancelVideoJob(jobId) {
 }
 
 export async function downloadVideoFile(jobId) {
-  const response = await fetch(`/api/video/jobs/${encodeURIComponent(jobId)}/file`);
+  const response = await fetch(apiUrl(`/api/video/jobs/${encodeURIComponent(jobId)}/file`));
 
   if (!response.ok) {
     throw new Error(await readError(response));

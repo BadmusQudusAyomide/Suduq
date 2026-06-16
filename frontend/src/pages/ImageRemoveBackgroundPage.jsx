@@ -8,6 +8,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
 import { formatFileSize, getFileStem } from '../lib/tool-utils';
+import { apiUrl } from '../lib/api-base';
 
 const config = getImageSpecialPageConfig('remove-bg');
 
@@ -53,7 +54,7 @@ export default function ImageRemoveBackgroundPage() {
     setBusy(true);
 
     try {
-      const blob = await processImage('/api/images/remove-bg', file);
+      const blob = await processImage(apiUrl('/api/images/remove-bg'), file);
       const url = URL.createObjectURL(blob);
       setAfterUrl(url);
       setResultName(`suduq-${getFileStem(file.name)}-no-bg.png`);

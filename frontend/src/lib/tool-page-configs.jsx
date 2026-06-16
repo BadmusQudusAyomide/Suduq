@@ -14,12 +14,13 @@ import {
   toSnakeCase,
   toTitleCase
 } from './text-utils';
+import { apiUrl } from './api-base';
 
 const imageToolPageConfigs = {
   compress: {
     title: 'Image Compress',
     description: 'Reduce file size while keeping the result clean enough for sharing and web use.',
-    endpoint: '/api/images/compress',
+    endpoint: apiUrl('/api/images/compress'),
     actionLabel: 'Compress image',
     fields: [
       {
@@ -51,7 +52,7 @@ const imageToolPageConfigs = {
   resize: {
     title: 'Image Resize',
     description: 'Set a target width and height, then let Sharp handle the export.',
-    endpoint: '/api/images/resize',
+    endpoint: apiUrl('/api/images/resize'),
     actionLabel: 'Resize image',
     fields: [
       {
@@ -79,7 +80,7 @@ const imageToolPageConfigs = {
   convert: {
     title: 'Image Convert',
     description: 'Convert images between PNG, JPG, and WEBP in one place.',
-    endpoint: '/api/images/convert',
+    endpoint: apiUrl('/api/images/convert'),
     actionLabel: 'Convert image',
     fields: [
       {

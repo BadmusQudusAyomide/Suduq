@@ -1,3 +1,5 @@
+import { apiUrl } from './api-base';
+
 export async function processImage(endpoint, file, fields = {}) {
   const formData = new FormData();
   formData.append('file', file);
@@ -8,7 +10,7 @@ export async function processImage(endpoint, file, fields = {}) {
     }
   });
 
-  const response = await fetch(endpoint, {
+  const response = await fetch(apiUrl(endpoint), {
     method: 'POST',
     body: formData
   });
