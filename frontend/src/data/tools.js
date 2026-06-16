@@ -207,6 +207,12 @@ export const categories = [
     label: 'Video Tools',
     icon: Clapperboard,
     description: 'Download-ready sections for social media video workflows.'
+  },
+  {
+    key: 'creators',
+    label: 'Creators Tools',
+    icon: Sparkles,
+    description: 'YouTube tools now, with room for TikTok, Instagram, and more later.'
   }
 ];
 
@@ -471,7 +477,94 @@ export const videoTools = [
   )
 ];
 
-export const toolRegistry = [...imageTools, ...textTools, ...videoTools];
+export const creatorTools = [
+  createTool(
+    {
+      key: 'monetization-checker',
+      label: 'Monetization Checker',
+      description: 'Check whether a channel is likely monetization-ready.',
+      path: '/tools/creators/monetization-checker'
+    },
+    'creators',
+    'ui',
+    [],
+    defaultOutput('Monetization status')
+  ),
+  createTool(
+    {
+      key: 'channel-stats',
+      label: 'Channel Stats Lookup',
+      description: 'See channel-level stats in a quick lookup view.',
+      path: '/tools/creators/channel-stats'
+    },
+    'creators',
+    'ui',
+    [],
+    defaultOutput('Channel stats')
+  ),
+  createTool(
+    {
+      key: 'video-tag-extractor',
+      label: 'Video Tag Extractor',
+      description: 'Prepare tags and keywords from a YouTube video.',
+      path: '/tools/creators/video-tag-extractor'
+    },
+    'creators',
+    'ui',
+    [],
+    defaultOutput('Video tags')
+  ),
+  createTool(
+    {
+      key: 'thumbnail-downloader',
+      label: 'Thumbnail Downloader',
+      description: 'Pull a YouTube thumbnail into a quick-download flow.',
+      path: '/tools/creators/thumbnail-downloader'
+    },
+    'creators',
+    'ui',
+    [],
+    defaultOutput('Thumbnail file')
+  ),
+  createTool(
+    {
+      key: 'channel-id-finder',
+      label: 'Channel ID Finder',
+      description: 'Look up a YouTube channel ID from a URL or handle.',
+      path: '/tools/creators/channel-id-finder'
+    },
+    'creators',
+    'ui',
+    [],
+    defaultOutput('Channel ID')
+  ),
+  createTool(
+    {
+      key: 'video-duration-formatter',
+      label: 'Video Duration Formatter',
+      description: 'Turn raw duration values into a readable format.',
+      path: '/tools/creators/video-duration-formatter'
+    },
+    'creators',
+    'ui',
+    [],
+    defaultOutput('Formatted duration')
+  ),
+  createTool(
+    {
+      key: 'youtube-to-mp3',
+      label: 'YouTube to MP3',
+      description: 'Simple UI for sending a YouTube link to an audio API later.',
+      path: '/tools/creators/youtube-to-mp3'
+    },
+    'creators',
+    'ui',
+    [],
+    defaultOutput('MP3 file')
+  )
+];
+
+export const toolRegistry = [...imageTools, ...textTools, ...videoTools, ...creatorTools];
 
 export const highlights = [
   {

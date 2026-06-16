@@ -50,12 +50,39 @@ function ToolLink({ tool, onClick, className = '' }) {
   );
 }
 
+function CategoryLink({ category, onClick, className = '' }) {
+  const Icon = category.icon;
+
+  return (
+    <NavLink
+      to={`/tools/${category.key}`}
+      onClick={onClick}
+      className={({ isActive }) =>
+        [
+          'flex items-start gap-3 rounded-md border px-3 py-3 text-sm transition-colors',
+          isActive ? 'border-primary bg-primary/5' : 'hover:bg-accent hover:text-accent-foreground',
+          className
+        ].join(' ')
+      }
+    >
+      <span className="mt-0.5 grid h-8 w-8 place-items-center rounded-md border bg-muted">
+        <Icon size={15} />
+      </span>
+      <span className="min-w-0">
+        <span className="block font-medium">{category.label}</span>
+        <span className="block text-xs text-muted-foreground">{category.description}</span>
+      </span>
+    </NavLink>
+  );
+}
+
 export default function AppShell() {
   const navigate = useNavigate();
   const location = useLocation();
   const recentTools = useRecentTools(location.pathname);
   const { favoriteTools } = useFavoritesTools();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const browseCategories = categories.filter((category) => ['images', 'text', 'video', 'creators'].includes(category.key));
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -95,19 +122,10 @@ export default function AppShell() {
                 <Separator />
                 <div className="space-y-1">
                   <p className="px-3 pb-1 pt-2 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
-                    Quick access
+                    Categories
                   </p>
-                  {imageTools.map((tool) => (
-                    <ToolLink key={tool.path} tool={tool} />
-                  ))}
-                </div>
-                <Separator />
-                <div className="space-y-1">
-                  <p className="px-3 pb-1 pt-2 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
-                    Text tools
-                  </p>
-                  {textTools.slice(0, 4).map((tool) => (
-                    <ToolLink key={tool.path} tool={tool} />
+                  {browseCategories.map((category) => (
+                    <CategoryLink key={category.key} category={category} />
                   ))}
                 </div>
               </CardContent>
@@ -147,25 +165,13 @@ export default function AppShell() {
 
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm">Tool Groups</CardTitle>
-                <CardDescription>Planned sections for the wider product.</CardDescription>
+                <CardTitle className="text-sm">Browse</CardTitle>
+                <CardDescription>Open a category page to see every tool in that group.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-2 pt-0">
-                {categories.map((category) => {
-                  const Icon = category.icon;
-
-                  return (
-                    <div key={category.key} className="flex items-start gap-3 rounded-md border p-3">
-                      <div className="mt-0.5 grid h-8 w-8 place-items-center rounded-md border bg-muted">
-                        <Icon size={15} />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium">{category.label}</p>
-                        <p className="text-xs text-muted-foreground">{category.description}</p>
-                      </div>
-                    </div>
-                  );
-                })}
+                {browseCategories.map((category) => (
+                  <CategoryLink key={category.key} category={category} />
+                ))}
               </CardContent>
             </Card>
           </div>
@@ -263,36 +269,15 @@ export default function AppShell() {
                     >
                       Dashboard
                     </NavLink>
-                    {imageTools.map((tool) => (
-                      <NavLink
-                        key={tool.path}
-                        to={tool.path}
-                        onClick={() => setMobileOpen(false)}
-                        className="block rounded-md border px-3 py-2 text-sm"
-                      >
-                        {tool.label}
-                      </NavLink>
-                    ))}
-                    {textTools.slice(0, 4).map((tool) => (
-                      <NavLink
-                        key={tool.path}
-                        to={tool.path}
-                        onClick={() => setMobileOpen(false)}
-                        className="block rounded-md border px-3 py-2 text-sm"
-                      >
-                        {tool.label}
-                      </NavLink>
-                    ))}
-                    {videoTools.map((tool) => (
-                      <NavLink
-                        key={tool.path}
-                        to={tool.path}
-                        onClick={() => setMobileOpen(false)}
-                        className="block rounded-md border px-3 py-2 text-sm"
-                      >
-                        {tool.label}
-                      </NavLink>
-                    ))}
+                    <div className="space-y-2 pt-2">
+                      {browseCategories.map((category) => (
+                        <CategoryLink
+                          key={category.key}
+                          category={category}
+                          onClick={() => setMobileOpen(false)}
+                        />
+                      ))}
+                    </div>
                   </div>
 
                   <div className="mt-6 space-y-3">
@@ -348,13 +333,13 @@ export default function AppShell() {
               </Sheet>
 
               <div className="flex gap-2 overflow-x-auto pb-1">
-                {imageTools.map((tool) => (
+                {browseCategories.map((category) => (
                   <NavLink
-                    key={tool.path}
-                    to={tool.path}
+                    key={category.key}
+                    to={`/tools/${category.key}`}
                     className="shrink-0 rounded-md border px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
                   >
-                    {tool.label}
+                    {category.label}
                   </NavLink>
                 ))}
               </div>

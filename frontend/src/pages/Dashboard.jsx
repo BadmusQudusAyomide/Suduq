@@ -1,154 +1,77 @@
-import { useMemo, useState } from 'react';
-import { Search } from 'lucide-react';
-import { categories, imageTools, textTools, videoTools, searchTools } from '../lib/tool-registry';
-import ToolCard from '../components/ToolCard';
-import { Badge } from '../components/ui/badge';
+import { Link } from 'react-router-dom';
+import { ArrowRight, Search } from 'lucide-react';
+import { categories, getToolsByCategory } from '../lib/tool-registry';
+import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Input } from '../components/ui/input';
-import { useFavoritesTools } from '../hooks/useFavoritesTools';
+import { Badge } from '../components/ui/badge';
 
-const sections = [
-  {
-    key: 'images',
-    title: 'Image Tools',
-    description: 'Quick browser and backend-assisted image workflows.',
-    items: imageTools
-  },
-  {
-    key: 'text',
-    title: 'Text Tools',
-    description: 'Writing, formatting, hashing, and utility text workflows.',
-    items: textTools
-  },
-  {
-    key: 'video',
-    title: 'Video Tools',
-    description: 'Sectioned download-ready workflows for social media videos.',
-    items: videoTools
-  }
-];
+const categoryPaths = {
+  images: '/tools/images',
+  text: '/tools/text',
+  video: '/tools/video',
+  creators: '/tools/creators'
+};
 
 export default function Dashboard() {
-  const [query, setQuery] = useState('');
-  const { favoriteTools, favoriteCount, isFavorite, toggleFavorite } = useFavoritesTools();
-
-  const filteredSections = useMemo(() => {
-    const visibleTools = searchTools(query);
-
-    return sections
-      .map((section) => ({
-        ...section,
-        items: section.items.filter((tool) => visibleTools.some((item) => item.key === tool.key))
-      }))
-      .filter((section) => section.items.length > 0);
-  }, [query]);
-
-  const totalCount = filteredSections.reduce((count, section) => count + section.items.length, 0);
-  const visibleFavorites = useMemo(() => {
-    const visibleTools = searchTools(query);
-    return favoriteTools.filter((tool) => visibleTools.some((item) => item.path === tool.path));
-  }, [favoriteTools, query]);
-
   return (
     <div className="grid gap-4">
-      <Card>
-        <CardHeader className="space-y-4">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div className="space-y-2">
-              <Badge className="w-fit">Suduq by Qudus</Badge>
-              <CardTitle className="text-3xl">Pick a tool and get moving.</CardTitle>
-              <CardDescription className="max-w-3xl text-base">
-                Search across the tools you've already built and jump straight into the one you need.
-              </CardDescription>
-            </div>
-
-            <div className="w-full max-w-md">
-              <div className="relative">
-                <Search
-                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                  size={16}
-                />
-                <Input
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Search tools..."
-                  className="pl-9"
-                />
+      <Card className="overflow-hidden">
+        <div className="bg-gradient-to-br from-background via-background to-muted/30">
+          <CardHeader className="space-y-4">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <div className="space-y-2">
+                <Badge className="w-fit">Suduq by Qudus</Badge>
+                <CardTitle className="text-3xl">One glance, three workspaces.</CardTitle>
+                <CardDescription className="max-w-2xl text-base">
+                  Start with a category, then open the exact tool you need from its dedicated page.
+                </CardDescription>
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">
-                {totalCount} tool{totalCount === 1 ? '' : 's'} visible
-              </p>
-            </div>
-          </div>
-        </CardHeader>
-      </Card>
 
-      {visibleFavorites.length ? (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <CardTitle className="text-xl">Favorites</CardTitle>
-                <CardDescription>Your starred tools, ready to open again.</CardDescription>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Search size={16} />
+                Category-first navigation
               </div>
-              <Badge variant="secondary">{favoriteCount}</Badge>
             </div>
           </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {visibleFavorites.map((tool) => (
-              <ToolCard
-                key={tool.path}
-                tool={tool}
-                isFavorite={isFavorite(tool.path)}
-                onToggleFavorite={toggleFavorite}
-              />
-            ))}
-          </CardContent>
-        </Card>
-      ) : null}
+        </div>
+      </Card>
 
-      <div className="grid gap-4 xl:grid-cols-[1fr_1fr]">
-        {filteredSections.map((section) => {
-          const category = categories.find((item) => item.key === section.key);
-          const Icon = category?.icon;
+      <div className="grid gap-4 md:grid-cols-3">
+        {categories
+          .filter((category) => categoryPaths[category.key])
+          .map((category) => {
+            const Icon = category.icon;
+            const toolCount = getToolsByCategory(category.key).length;
 
-          return (
-            <Card key={section.key}>
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  {Icon ? (
-                    <span className="grid h-10 w-10 place-items-center rounded-md border bg-muted">
-                      <Icon size={16} />
-                    </span>
-                  ) : null}
-                  <div>
-                    <CardTitle className="text-xl">{section.title}</CardTitle>
-                    <CardDescription>{section.description}</CardDescription>
+            return (
+              <Card key={category.key} className="h-full">
+                <CardHeader>
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="space-y-3">
+                      <div className="grid h-12 w-12 place-items-center rounded-xl border bg-muted">
+                        <Icon size={18} />
+                      </div>
+                      <div>
+                        <CardTitle className="text-xl">{category.label}</CardTitle>
+                        <CardDescription className="mt-1">{category.description}</CardDescription>
+                      </div>
+                    </div>
+                    <Badge variant="secondary">{toolCount} tools</Badge>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent className="grid gap-4 md:grid-cols-2">
-                {section.items.map((tool) => (
-                  <ToolCard
-                    key={tool.path}
-                    tool={tool}
-                    isFavorite={isFavorite(tool.path)}
-                    onToggleFavorite={toggleFavorite}
-                  />
-                ))}
-              </CardContent>
-            </Card>
-          );
-        })}
+                </CardHeader>
+                <CardContent className="flex items-center justify-between gap-3">
+                  <p className="text-sm text-muted-foreground">Open the full list for this workspace.</p>
+                  <Button asChild variant="outline" size="sm">
+                    <Link to={categoryPaths[category.key]}>
+                      Open
+                      <ArrowRight size={16} />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          })}
       </div>
-
-      {filteredSections.length === 0 ? (
-        <Card>
-          <CardContent className="py-10 text-center">
-            <p className="text-sm text-muted-foreground">No tools match that search.</p>
-          </CardContent>
-        </Card>
-      ) : null}
     </div>
   );
 }

@@ -18,6 +18,8 @@ import PasswordGeneratorPage from './pages/PasswordGeneratorPage';
 import UuidGeneratorPage from './pages/UuidGeneratorPage';
 import HashGeneratorPage from './pages/HashGeneratorPage';
 import VideoDownloaderPage from './pages/VideoDownloaderPage';
+import CategoryPage from './pages/CategoryPage';
+import CreatorToolPage from './pages/CreatorToolPage';
 import NotFound from './pages/NotFound';
 
 function ScrollToTop() {
@@ -38,8 +40,9 @@ export default function App() {
         <Route element={<AppShell />}>
           <Route index element={<Dashboard />} />
           <Route path="tools">
-            <Route index element={<Navigate to="/tools/images/compress" replace />} />
+            <Route index element={<Navigate to="/tools/images" replace />} />
             <Route path="images">
+              <Route index element={<CategoryPage categoryKey="images" />} />
               <Route path="compress" element={<ImageCompressPage />} />
               <Route path="resize" element={<ImageResizePage />} />
               <Route path="convert" element={<ImageConvertPage />} />
@@ -48,7 +51,7 @@ export default function App() {
               <Route path="color-picker" element={<ImageColorPickerPage />} />
             </Route>
             <Route path="text">
-              <Route index element={<Navigate to="/tools/text/counter" replace />} />
+              <Route index element={<CategoryPage categoryKey="text" />} />
               <Route path="counter" element={<TextCounterPage />} />
               <Route path="case" element={<TextCasePage />} />
               <Route path="lorem" element={<LoremPage />} />
@@ -60,8 +63,12 @@ export default function App() {
               <Route path="hash" element={<HashGeneratorPage />} />
             </Route>
             <Route path="video">
-              <Route index element={<Navigate to="/tools/video/youtube" replace />} />
+              <Route index element={<CategoryPage categoryKey="video" />} />
               <Route path=":platform" element={<VideoDownloaderPage />} />
+            </Route>
+            <Route path="creators">
+              <Route index element={<CategoryPage categoryKey="creators" />} />
+              <Route path=":toolKey" element={<CreatorToolPage />} />
             </Route>
           </Route>
         </Route>

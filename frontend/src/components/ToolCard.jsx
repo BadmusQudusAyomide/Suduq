@@ -29,7 +29,7 @@ export default function ToolCard({ tool, isFavorite = false, onToggleFavorite })
                 </Button>
               ) : null}
               <Badge variant={tool.execution === 'server' ? 'secondary' : 'outline'}>
-                {tool.execution || 'client'}
+                {(tool.execution || 'client').toUpperCase()}
               </Badge>
             </div>
             <Link

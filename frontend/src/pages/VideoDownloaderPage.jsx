@@ -216,19 +216,20 @@ export default function VideoDownloaderPage() {
 
   const liveJob = activeJob && !terminalStatuses.has(activeJob.status) ? activeJob : null;
   const progressValue = Math.max(0, Math.min(100, Number(liveJob?.progress || 0)));
+  const compactHistory = history.slice(0, 5);
 
   return (
     <ToolShell
       categoryLabel="Video tools"
       title={tool?.label || 'Video Downloader'}
-      description={tool?.description || 'Download social video links from a platform-specific section.'}
+      description={tool?.description || 'Paste a public video link and download it in one step.'}
       rightTitle="Download status"
-      rightDescription="Track the live job on the right and keep browser-local history without an account."
+      rightDescription="Quick status here, browser history below."
       leftChildren={
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="space-y-2">
             <label className="text-sm font-medium" htmlFor="video-url">
-              Video URL
+              Paste video link
             </label>
             <div className="relative">
               <LinkIcon className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
@@ -240,34 +241,15 @@ export default function VideoDownloaderPage() {
                 className="pl-9"
               />
             </div>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-xl border bg-background p-4">
-              <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Platform</p>
-              <p className="mt-2 text-sm font-medium">{preset.label}</p>
-              <p className="mt-1 text-sm text-muted-foreground">{preset.hint}</p>
-            </div>
-            <div className="rounded-xl border bg-background p-4">
-              <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Preset</p>
-              <p className="mt-2 text-sm font-medium">{preset.title}</p>
-              <p className="mt-1 text-sm text-muted-foreground">{preset.description}</p>
-            </div>
-            <div className="rounded-xl border bg-background p-4">
-              <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Status</p>
-              <Badge className="mt-2 w-fit" variant="secondary">
-                {liveJob ? statusLabel(liveJob.status) : 'Ready'}
-              </Badge>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {liveJob ? 'The backend is processing your video.' : 'The backend is ready to start a job.'}
-              </p>
-            </div>
+            <p className="text-xs text-muted-foreground">
+              Public links only. {preset.hint}
+            </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
             <Button type="submit" disabled={isDownloading}>
               <Download size={16} />
-              {isDownloading ? 'Working...' : 'Download video'}
+              {isDownloading ? 'Downloading...' : 'Download now'}
             </Button>
             {liveJob && !terminalStatuses.has(liveJob.status) ? (
               <Button type="button" variant="outline" onClick={handleCancel} disabled={cancelRequested}>
@@ -284,9 +266,9 @@ export default function VideoDownloaderPage() {
           <div className="rounded-lg border bg-background p-4">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-sm font-medium">Live job</p>
+                <p className="text-sm font-medium">Current status</p>
                 <p className="text-sm text-muted-foreground">
-                  {liveJob ? 'Watching yt-dlp in real time.' : 'No active job right now.'}
+                  {liveJob ? 'Downloading in progress.' : 'Ready when you are.'}
                 </p>
               </div>
               <Badge variant={liveJob ? 'secondary' : 'outline'}>{liveJob ? statusLabel(liveJob.status) : 'Idle'}</Badge>
@@ -304,22 +286,11 @@ export default function VideoDownloaderPage() {
                   </div>
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-lg border bg-muted/20 p-3">
-                    <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Speed</p>
-                    <p className="mt-1 text-sm font-medium">{liveJob.currentSpeed || 'Waiting for yt-dlp...'}</p>
-                  </div>
-                  <div className="rounded-lg border bg-muted/20 p-3">
-                    <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">ETA</p>
-                    <p className="mt-1 text-sm font-medium">{liveJob.eta || 'Calculating...'}</p>
-                  </div>
-                </div>
-
                 <div className="rounded-lg border bg-muted/20 p-3">
-                  <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Current stage</p>
+                  <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Details</p>
                   <p className="mt-1 text-sm font-medium">{statusLabel(liveJob.status)}</p>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    {liveJob.totalSize ? `Total size: ${liveJob.totalSize}` : 'Total size appears after yt-dlp starts streaming progress.'}
+                    {liveJob.totalSize ? `Size: ${liveJob.totalSize}` : liveJob.currentSpeed || liveJob.eta || 'Working...'}
                   </p>
                 </div>
               </div>
@@ -337,7 +308,7 @@ export default function VideoDownloaderPage() {
           <div className="rounded-lg border bg-background p-4">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-sm font-medium">Download history</p>
+                <p className="text-sm font-medium">Recent downloads</p>
                 <p className="text-sm text-muted-foreground">Saved in this browser only. No account needed.</p>
               </div>
               <Button type="button" variant="ghost" size="sm" onClick={clearHistory} disabled={!history.length}>
@@ -346,8 +317,8 @@ export default function VideoDownloaderPage() {
             </div>
 
             <div className="mt-4 space-y-3">
-              {history.length ? (
-                history.map((item) => (
+              {compactHistory.length ? (
+                compactHistory.map((item) => (
                   <div key={item.id} className="rounded-lg border p-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
