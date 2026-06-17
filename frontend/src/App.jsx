@@ -4,6 +4,7 @@ import AppShell from './components/AppShell';
 import Dashboard from './pages/Dashboard';
 import ImageCompressPage from './pages/ImageCompressPage';
 import ImageResizePage from './pages/ImageResizePage';
+import ImageYoutubeBannerPage from './pages/ImageYoutubeBannerPage';
 import ImageConvertPage from './pages/ImageConvertPage';
 import ImageBase64Page from './pages/ImageBase64Page';
 import ImageRemoveBackgroundPage from './pages/ImageRemoveBackgroundPage';
@@ -45,6 +46,7 @@ export default function App() {
               <Route index element={<CategoryPage categoryKey="images" />} />
               <Route path="compress" element={<ImageCompressPage />} />
               <Route path="resize" element={<ImageResizePage />} />
+              <Route path="youtube-banner" element={<ImageYoutubeBannerPage />} />
               <Route path="convert" element={<ImageConvertPage />} />
               <Route path="base64" element={<ImageBase64Page />} />
               <Route path="remove-bg" element={<ImageRemoveBackgroundPage />} />

@@ -26,6 +26,24 @@ function toInt(value, fallback) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+function toBoolean(value, fallback = false) {
+  if (value === undefined || value === null || value === '') {
+    return fallback;
+  }
+
+  const normalized = String(value).trim().toLowerCase();
+
+  if (['true', '1', 'yes', 'on'].includes(normalized)) {
+    return true;
+  }
+
+  if (['false', '0', 'no', 'off'].includes(normalized)) {
+    return false;
+  }
+
+  return fallback;
+}
+
 function buildOutputName(originalName, extension) {
   const base = originalName.replace(/\.[^.]+$/, '');
   return `${base}-suduq.${extension}`;
@@ -86,19 +104,48 @@ router.post('/resize', upload.single('file'), ensureFile, async (req, res, next)
   try {
     const width = toInt(req.body.width, null);
     const height = toInt(req.body.height, null);
-    const output = await sharp(req.file.buffer)
-      .rotate()
-      .resize({
-        width: width || undefined,
-        height: height || undefined,
-        fit: 'inside',
-        withoutEnlargement: true
-      })
-      .png()
-      .toBuffer();
+    const format = String(req.body.format || 'png').toLowerCase();
+    const fit = String(req.body.fit || 'inside').toLowerCase();
+    const quality = Math.min(100, Math.max(1, toInt(req.body.quality, 90)));
+    const withoutEnlargement = toBoolean(req.body.withoutEnlargement, true);
+    let image = sharp(req.file.buffer).rotate();
 
-    res.setHeader('Content-Type', 'image/png');
-    res.setHeader('Content-Disposition', `attachment; filename="${buildOutputName(req.file.originalname, 'png')}"`);
+    image = image.resize({
+      width: width || undefined,
+      height: height || undefined,
+      fit,
+      withoutEnlargement
+    });
+
+    let output;
+    let mimeType = mimeMap[format] || 'image/png';
+    let extension = extMap[format] || 'png';
+
+    if (format === 'jpeg' || format === 'jpg') {
+      output = await image
+        .flatten({ background: '#ffffff' })
+        .jpeg({ quality, mozjpeg: true })
+        .toBuffer();
+      mimeType = 'image/jpeg';
+      extension = 'jpg';
+    } else if (format === 'webp') {
+      output = await image.webp({ quality }).toBuffer();
+      mimeType = 'image/webp';
+      extension = 'webp';
+    } else if (format === 'avif') {
+      output = await image.avif({ quality }).toBuffer();
+      mimeType = 'image/avif';
+      extension = 'avif';
+    } else {
+      output = await image
+        .png({ compressionLevel: 9 })
+        .toBuffer();
+      mimeType = 'image/png';
+      extension = 'png';
+    }
+
+    res.setHeader('Content-Type', mimeType);
+    res.setHeader('Content-Disposition', `attachment; filename="${buildOutputName(req.file.originalname, extension)}"`);
     return res.send(output);
   } catch (error) {
     return next(error);

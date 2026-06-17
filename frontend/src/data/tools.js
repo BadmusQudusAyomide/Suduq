@@ -552,6 +552,18 @@ export const creatorTools = [
   ),
   createTool(
     {
+      key: 'youtube-banner',
+      label: 'YouTube Banner Resizer',
+      description: 'Resize an image to the 2048 x 1152 YouTube banner spec.',
+      path: '/tools/images/youtube-banner'
+    },
+    'creators',
+    'server',
+    [],
+    defaultOutput('Banner image')
+  ),
+  createTool(
+    {
       key: 'youtube-to-mp3',
       label: 'YouTube to MP3',
       description: 'Simple UI for sending a YouTube link to an audio API later.',

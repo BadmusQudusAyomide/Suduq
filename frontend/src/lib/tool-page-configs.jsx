@@ -77,6 +77,68 @@ const imageToolPageConfigs = {
       height: values.height
     })
   },
+  'youtube-banner': {
+    title: 'YouTube Banner',
+    description: 'Create a YouTube channel banner at 2048 x 1152 and keep the export small enough to upload.',
+    endpoint: apiUrl('/api/images/resize'),
+    actionLabel: 'Create banner',
+    fields: [
+      {
+        name: 'width',
+        label: 'Width (px)',
+        type: 'number',
+        min: 1,
+        defaultValue: 2048,
+        placeholder: '2048'
+      },
+      {
+        name: 'height',
+        label: 'Height (px)',
+        type: 'number',
+        min: 1,
+        defaultValue: 1152,
+        placeholder: '1152'
+      },
+      {
+        name: 'fit',
+        label: 'Fit mode',
+        type: 'select',
+        defaultValue: 'cover',
+        options: [
+          { value: 'cover', label: 'Cover' },
+          { value: 'contain', label: 'Contain' }
+        ]
+      },
+      {
+        name: 'format',
+        label: 'Output format',
+        type: 'select',
+        defaultValue: 'jpeg',
+        options: [
+          { value: 'jpeg', label: 'JPG' },
+          { value: 'webp', label: 'WEBP' },
+          { value: 'png', label: 'PNG' }
+        ]
+      },
+      {
+        name: 'quality',
+        label: 'Quality',
+        type: 'range',
+        min: 40,
+        max: 95,
+        step: 1,
+        defaultValue: 82
+      }
+    ],
+    onBuildFields: (values) => ({
+      width: values.width,
+      height: values.height,
+      fit: values.fit,
+      format: values.format,
+      quality: values.quality,
+      withoutEnlargement: false
+    })
+  },
   convert: {
     title: 'Image Convert',
     description: 'Convert images between PNG, JPG, and WEBP in one place.',
