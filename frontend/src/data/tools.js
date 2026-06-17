@@ -555,7 +555,7 @@ export const creatorTools = [
       key: 'youtube-banner',
       label: 'YouTube Banner Resizer',
       description: 'Resize an image to the 2048 x 1152 YouTube banner spec.',
-      path: '/tools/images/youtube-banner'
+      path: '/tools/creators/youtube-banner'
     },
     'creators',
     'server',

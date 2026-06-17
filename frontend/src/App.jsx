@@ -46,7 +46,6 @@ export default function App() {
               <Route index element={<CategoryPage categoryKey="images" />} />
               <Route path="compress" element={<ImageCompressPage />} />
               <Route path="resize" element={<ImageResizePage />} />
-              <Route path="youtube-banner" element={<ImageYoutubeBannerPage />} />
               <Route path="convert" element={<ImageConvertPage />} />
               <Route path="base64" element={<ImageBase64Page />} />
               <Route path="remove-bg" element={<ImageRemoveBackgroundPage />} />
@@ -70,6 +69,7 @@ export default function App() {
             </Route>
             <Route path="creators">
               <Route index element={<CategoryPage categoryKey="creators" />} />
+              <Route path="youtube-banner" element={<ImageYoutubeBannerPage />} />
               <Route path=":toolKey" element={<CreatorToolPage />} />
             </Route>
           </Route>
