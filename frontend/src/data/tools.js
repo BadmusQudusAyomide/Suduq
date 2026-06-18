@@ -1,4 +1,4 @@
-import { Image, FileType2, ScanText, Hash, Sparkles, Clapperboard } from 'lucide-react';
+import { Image, FileType2, ScanText, Sparkles, Clapperboard, Code2 } from 'lucide-react';
 
 const defaultOutput = (label) => [
   {
@@ -187,8 +187,8 @@ export const categories = [
   {
     key: 'dev',
     label: 'Dev Tools',
-    icon: Hash,
-    description: 'Base64, URL, JWT, regex, color, and hashing utilities.'
+    icon: Code2,
+    description: 'Regex, JWT, color, diff, markdown, cron, and conversion utilities.'
   },
   {
     key: 'ai',
@@ -477,6 +477,129 @@ export const videoTools = [
   )
 ];
 
+export const devTools = [
+  createTool(
+    {
+      key: 'regex',
+      label: 'Regex Tester',
+      description: 'Check a regular expression against sample text in real time.',
+      path: '/tools/dev/regex'
+    },
+    'dev',
+    'client',
+    [],
+    defaultOutput('Regex match')
+  ),
+  createTool(
+    {
+      key: 'jwt',
+      label: 'JWT Decoder',
+      description: 'Decode JWT headers and payloads without verifying the signature.',
+      path: '/tools/dev/jwt'
+    },
+    'dev',
+    'client',
+    [],
+    defaultOutput('Decoded token')
+  ),
+  createTool(
+    {
+      key: 'color',
+      label: 'Color Converter',
+      description: 'Convert between HEX, RGB, and HSL with a live color preview.',
+      path: '/tools/dev/color'
+    },
+    'dev',
+    'client',
+    [],
+    defaultOutput('Color values')
+  ),
+  createTool(
+    {
+      key: 'diff',
+      label: 'Diff Checker',
+      description: 'Compare two text blocks and inspect the line-by-line differences.',
+      path: '/tools/dev/diff'
+    },
+    'dev',
+    'client',
+    [],
+    defaultOutput('Diff output')
+  ),
+  createTool(
+    {
+      key: 'markdown',
+      label: 'Markdown Previewer',
+      description: 'Write Markdown and preview the rendered HTML live.',
+      path: '/tools/dev/markdown'
+    },
+    'dev',
+    'client',
+    [],
+    defaultOutput('Markdown preview')
+  ),
+  createTool(
+    {
+      key: 'cron',
+      label: 'Cron Explainer',
+      description: 'Turn cron expressions into plain English.',
+      path: '/tools/dev/cron'
+    },
+    'dev',
+    'client',
+    [],
+    defaultOutput('Cron explanation')
+  ),
+  createTool(
+    {
+      key: 'timestamp',
+      label: 'Timestamp Converter',
+      description: 'Convert Unix timestamps and readable dates both ways.',
+      path: '/tools/dev/timestamp'
+    },
+    'dev',
+    'client',
+    [],
+    defaultOutput('Timestamp conversion')
+  ),
+  createTool(
+    {
+      key: 'number-base',
+      label: 'Number Base Converter',
+      description: 'Convert integers between binary, octal, decimal, and hex.',
+      path: '/tools/dev/number-base'
+    },
+    'dev',
+    'client',
+    [],
+    defaultOutput('Base conversion')
+  ),
+  createTool(
+    {
+      key: 'css',
+      label: 'CSS Minifier / Beautifier',
+      description: 'Compact CSS for shipping or format it for editing.',
+      path: '/tools/dev/css'
+    },
+    'dev',
+    'client',
+    [],
+    defaultOutput('CSS output')
+  ),
+  createTool(
+    {
+      key: 'html',
+      label: 'HTML Encoder / Decoder',
+      description: 'Escape HTML entities or decode them back into markup.',
+      path: '/tools/dev/html'
+    },
+    'dev',
+    'client',
+    [],
+    defaultOutput('HTML output')
+  )
+];
+
 export const creatorTools = [
   createTool(
     {
@@ -576,7 +699,7 @@ export const creatorTools = [
   )
 ];
 
-export const toolRegistry = [...imageTools, ...textTools, ...videoTools, ...creatorTools];
+export const toolRegistry = [...imageTools, ...textTools, ...videoTools, ...creatorTools, ...devTools];
 
 export const highlights = [
   {

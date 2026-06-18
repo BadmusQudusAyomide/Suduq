@@ -9,7 +9,8 @@ const categoryPaths = {
   images: '/tools/images',
   text: '/tools/text',
   video: '/tools/video',
-  creators: '/tools/creators'
+  creators: '/tools/creators',
+  dev: '/tools/dev'
 };
 
 export default function Dashboard() {

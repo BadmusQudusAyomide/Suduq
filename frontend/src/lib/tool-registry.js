@@ -3,6 +3,7 @@ export {
   imageTools,
   textTools,
   videoTools,
+  devTools,
   toolRegistry,
   highlights,
   getToolByKey,

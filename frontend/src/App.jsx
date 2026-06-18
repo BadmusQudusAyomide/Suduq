@@ -21,6 +21,7 @@ import HashGeneratorPage from './pages/HashGeneratorPage';
 import VideoDownloaderPage from './pages/VideoDownloaderPage';
 import CategoryPage from './pages/CategoryPage';
 import CreatorToolPage from './pages/CreatorToolPage';
+import DevToolPage from './pages/DevToolPage';
 import NotFound from './pages/NotFound';
 
 function ScrollToTop() {
@@ -71,6 +72,10 @@ export default function App() {
               <Route index element={<CategoryPage categoryKey="creators" />} />
               <Route path="youtube-banner" element={<ImageYoutubeBannerPage />} />
               <Route path=":toolKey" element={<CreatorToolPage />} />
+            </Route>
+            <Route path="dev">
+              <Route index element={<CategoryPage categoryKey="dev" />} />
+              <Route path=":toolKey" element={<DevToolPage />} />
             </Route>
           </Route>
         </Route>
