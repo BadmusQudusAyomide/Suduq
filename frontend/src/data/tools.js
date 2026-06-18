@@ -600,6 +600,93 @@ export const devTools = [
   )
 ];
 
+export const utilityTools = [
+  createTool(
+    {
+      key: 'unit',
+      label: 'Unit Converter',
+      description: 'Convert length, weight, temperature, speed, area, and volume units.',
+      path: '/tools/utility/unit'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Converted value')
+  ),
+  createTool(
+    {
+      key: 'currency',
+      label: 'Currency Converter',
+      description: 'Convert between currencies using live exchange rates.',
+      path: '/tools/utility/currency'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Converted currency')
+  ),
+  createTool(
+    {
+      key: 'number-base',
+      label: 'Number Base Converter',
+      description: 'Convert between binary, octal, decimal, and hexadecimal values.',
+      path: '/tools/utility/number-base'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Base conversion')
+  ),
+  createTool(
+    {
+      key: 'roman',
+      label: 'Roman Numeral Converter',
+      description: 'Convert Roman numerals to numbers and back.',
+      path: '/tools/utility/roman'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Roman conversion')
+  ),
+  createTool(
+    {
+      key: 'number-to-words',
+      label: 'Number to Words',
+      description: 'Write whole numbers as words.',
+      path: '/tools/utility/number-to-words'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Number words')
+  ),
+  createTool(
+    {
+      key: 'file-size',
+      label: 'File Size Converter',
+      description: 'Convert bytes, KB, MB, GB, and TB values.',
+      path: '/tools/utility/file-size'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Converted size')
+  ),
+  createTool(
+    {
+      key: 'color',
+      label: 'Color Converter',
+      description: 'Convert between HEX, RGB, and HSL values.',
+      path: '/tools/utility/color'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Color values')
+  )
+];
+
 export const creatorTools = [
   createTool(
     {
@@ -699,7 +786,14 @@ export const creatorTools = [
   )
 ];
 
-export const toolRegistry = [...imageTools, ...textTools, ...videoTools, ...creatorTools, ...devTools];
+export const toolRegistry = [
+  ...imageTools,
+  ...textTools,
+  ...videoTools,
+  ...creatorTools,
+  ...devTools,
+  ...utilityTools
+];
 
 export const highlights = [
   {

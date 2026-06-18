@@ -10,7 +10,8 @@ const categoryPaths = {
   text: '/tools/text',
   video: '/tools/video',
   creators: '/tools/creators',
-  dev: '/tools/dev'
+  dev: '/tools/dev',
+  utility: '/tools/utility'
 };
 
 export default function Dashboard() {

@@ -4,6 +4,7 @@ export {
   textTools,
   videoTools,
   devTools,
+  utilityTools,
   toolRegistry,
   highlights,
   getToolByKey,

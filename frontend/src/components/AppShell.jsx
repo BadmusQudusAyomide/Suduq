@@ -82,7 +82,9 @@ export default function AppShell() {
   const recentTools = useRecentTools(location.pathname);
   const { favoriteTools } = useFavoritesTools();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const browseCategories = categories.filter((category) => ['images', 'text', 'video', 'creators'].includes(category.key));
+  const browseCategories = categories.filter((category) =>
+    ['images', 'text', 'video', 'dev', 'utility', 'creators'].includes(category.key)
+  );
 
   return (
     <div className="min-h-screen bg-background text-foreground">

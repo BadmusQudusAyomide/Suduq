@@ -19,6 +19,7 @@ import PasswordGeneratorPage from './pages/PasswordGeneratorPage';
 import UuidGeneratorPage from './pages/UuidGeneratorPage';
 import HashGeneratorPage from './pages/HashGeneratorPage';
 import VideoDownloaderPage from './pages/VideoDownloaderPage';
+import UtilityToolPage from './pages/UtilityToolPage';
 import CategoryPage from './pages/CategoryPage';
 import CreatorToolPage from './pages/CreatorToolPage';
 import DevToolPage from './pages/DevToolPage';
@@ -67,6 +68,10 @@ export default function App() {
             <Route path="video">
               <Route index element={<CategoryPage categoryKey="video" />} />
               <Route path=":platform" element={<VideoDownloaderPage />} />
+            </Route>
+            <Route path="utility">
+              <Route index element={<CategoryPage categoryKey="utility" />} />
+              <Route path=":toolKey" element={<UtilityToolPage />} />
             </Route>
             <Route path="creators">
               <Route index element={<CategoryPage categoryKey="creators" />} />
