@@ -1,3 +1,6 @@
+import bcrypt from 'bcryptjs';
+import YAML from 'yaml';
+
 const UNIT_GROUPS = {
   length: {
     label: 'Length',
@@ -626,6 +629,468 @@ export function calculateVolume(shape, values) {
     default:
       throw new Error('Unsupported volume shape.');
   }
+}
+
+function encodeBase64Url(value) {
+  const bytes = typeof value === 'string'
+    ? new TextEncoder().encode(value)
+    : value;
+
+  let binary = '';
+  bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+
+  return btoa(binary)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/g, '');
+}
+
+function decodeBase64Url(value) {
+  const base64 = value.replace(/-/g, '+').replace(/_/g, '/');
+  const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, '=');
+  return atob(padded);
+}
+
+async function createHmacSignature(secret, message) {
+  const key = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const signature = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(message));
+  return btoa(String.fromCharCode(...new Uint8Array(signature)));
+}
+
+function splitCsvRows(text) {
+  const rows = [];
+  let row = [];
+  let cell = '';
+  let inQuotes = false;
+
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index];
+    const next = text[index + 1];
+
+    if (char === '"') {
+      if (inQuotes && next === '"') {
+        cell += '"';
+        index += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (char === ',' && !inQuotes) {
+      row.push(cell);
+      cell = '';
+    } else if ((char === '\n' || (char === '\r' && next !== '\n')) && !inQuotes) {
+      row.push(cell);
+      rows.push(row);
+      row = [];
+      cell = '';
+      if (char === '\r') {
+        index += 0;
+      }
+    } else if (char === '\r' && next === '\n' && !inQuotes) {
+      row.push(cell);
+      rows.push(row);
+      row = [];
+      cell = '';
+      index += 1;
+    } else {
+      cell += char;
+    }
+  }
+
+  if (cell.length > 0 || row.length > 0) {
+    row.push(cell);
+    rows.push(row);
+  }
+
+  return rows;
+}
+
+function objectToCsv(data) {
+  if (Array.isArray(data)) {
+    if (!data.length) {
+      return '';
+    }
+
+    const headers = Object.keys(data[0]);
+    const rows = data.map((item) => headers.map((header) => String(item[header] ?? '')));
+
+    const escape = (value) => {
+      const text = String(value);
+      return /[",\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
+    };
+
+    return [headers.join(','), ...rows.map((row) => row.map(escape).join(','))].join('\n');
+  }
+
+  if (data && typeof data === 'object') {
+    return Object.entries(data)
+      .map(([key, value]) => `${key},${String(value)}`)
+      .join('\n');
+  }
+
+  throw new Error('JSON input must be an array of objects or an object.');
+}
+
+function sanitizeText(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function parseXmlToObject(xmlText) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(xmlText, 'application/xml');
+  const errorNode = doc.querySelector('parsererror');
+
+  if (errorNode) {
+    throw new Error('Invalid XML input.');
+  }
+
+  function nodeToValue(node) {
+    if (!node) {
+      return '';
+    }
+
+    const children = Array.from(node.children);
+    if (children.length === 0) {
+      return node.textContent || '';
+    }
+
+    const result = {};
+    children.forEach((child) => {
+      const childValue = nodeToValue(child);
+      if (Object.hasOwn(result, child.tagName)) {
+        const current = result[child.tagName];
+        result[child.tagName] = Array.isArray(current)
+          ? [...current, childValue]
+          : [current, childValue];
+      } else {
+        result[child.tagName] = childValue;
+      }
+    });
+
+    return result;
+  }
+
+  return nodeToValue(doc.documentElement);
+}
+
+export async function lookupIpAddress() {
+  const response = await fetch('https://api.ipify.org?format=json');
+  const data = await response.json();
+
+  if (!response.ok || !data.ip) {
+    throw new Error('Unable to determine the public IP address.');
+  }
+
+  return data;
+}
+
+export async function lookupDns(hostname) {
+  const encoded = encodeURIComponent(hostname);
+  const response = await fetch(`https://dns.google/resolve?name=${encoded}&type=A`);
+  const data = await response.json();
+
+  if (!response.ok || !Array.isArray(data.Answer)) {
+    throw new Error('Unable to resolve DNS records.');
+  }
+
+  return {
+    hostname,
+    answers: data.Answer.map((item) => ({
+      type: item.type,
+      ttl: item.TTL,
+      data: item.data
+    }))
+  };
+}
+
+export function getHttpStatusInfo(code) {
+  const statusMap = {
+    100: 'Continue',
+    101: 'Switching Protocols',
+    200: 'OK',
+    201: 'Created',
+    202: 'Accepted',
+    204: 'No Content',
+    301: 'Moved Permanently',
+    302: 'Found',
+    304: 'Not Modified',
+    400: 'Bad Request',
+    401: 'Unauthorized',
+    403: 'Forbidden',
+    404: 'Not Found',
+    405: 'Method Not Allowed',
+    408: 'Request Timeout',
+    409: 'Conflict',
+    410: 'Gone',
+    422: 'Unprocessable Entity',
+    429: 'Too Many Requests',
+    500: 'Internal Server Error',
+    502: 'Bad Gateway',
+    503: 'Service Unavailable',
+    504: 'Gateway Timeout'
+  };
+
+  return {
+    code,
+    message: statusMap[code] || 'Unknown status code',
+    category: code >= 500 ? 'Server error' : code >= 400 ? 'Client error' : code >= 300 ? 'Redirect' : code >= 200 ? 'Success' : 'Informational'
+  };
+}
+
+export function parseUserAgent(value) {
+  const raw = value || navigator.userAgent;
+  const browser = /Edg\//.test(raw) ? 'Edge' : /Chrome\//.test(raw) ? 'Chrome' : /Firefox\//.test(raw) ? 'Firefox' : /Safari\//.test(raw) ? 'Safari' : 'Unknown';
+  const platform = /Windows/.test(raw) ? 'Windows' : /Mac OS X/.test(raw) ? 'macOS' : /Linux/.test(raw) ? 'Linux' : /Android/.test(raw) ? 'Android' : /iPhone|iPad/.test(raw) ? 'iOS' : 'Unknown';
+
+  return {
+    userAgent: raw,
+    browser,
+    platform,
+    isMobile: /Mobile|Android|iPhone|iPad/.test(raw)
+  };
+}
+
+export function checkSslCertificate(url) {
+  const normalized = String(url || '').trim();
+  if (!normalized) {
+    throw new Error('Enter a valid URL.');
+  }
+
+  const isSecure = /^https:/i.test(normalized);
+  const hostname = (() => {
+    try {
+      return new URL(normalized).hostname;
+    } catch {
+      return '';
+    }
+  })();
+
+  return {
+    url: normalized,
+    hostname,
+    isSecure,
+    status: isSecure && hostname ? 'Likely secure' : 'Needs HTTPS'
+  };
+}
+
+export function simulatePing(hostname) {
+  const target = String(hostname || '').trim() || 'example.com';
+  const latency = Math.floor(15 + Math.random() * 80);
+  return {
+    host: target,
+    latency,
+    status: latency < 50 ? 'Responsive' : 'Slow response'
+  };
+}
+
+export async function generateQrCode(text, size = 300) {
+  const encoded = encodeURIComponent(text || '');
+  const response = await fetch(`https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encoded}`);
+  if (!response.ok) {
+    throw new Error('Unable to generate QR code.');
+  }
+  return {
+    imageUrl: URL.createObjectURL(await response.blob()),
+    size
+  };
+}
+
+export async function generateBarcode(text) {
+  const encoded = encodeURIComponent(text || '');
+  const response = await fetch(`https://barcode.tec-it.com/barcode.ashx?data=${encoded}&code=Code128&translate-esc=false`);
+  if (!response.ok) {
+    throw new Error('Unable to generate barcode.');
+  }
+  return {
+    imageUrl: URL.createObjectURL(await response.blob())
+  };
+}
+
+export function generateFakeData(type) {
+  const names = ['Avery', 'Jordan', 'Taylor', 'Casey', 'Morgan', 'Riley'];
+  const domains = ['example.com', 'mail.io', 'demo.dev'];
+  const streets = ['Main Street', 'Oak Avenue', 'Maple Road', 'Pine Lane'];
+  const cities = ['Seattle', 'Austin', 'Chicago', 'Miami'];
+
+  switch (type) {
+    case 'name':
+      return names[Math.floor(Math.random() * names.length)];
+    case 'email':
+      return `${names[Math.floor(Math.random() * names.length)].toLowerCase()}${Math.floor(Math.random() * 99)}@${domains[Math.floor(Math.random() * domains.length)]}`;
+    case 'address':
+      return `${Math.floor(Math.random() * 999) + 1} ${streets[Math.floor(Math.random() * streets.length)]}, ${cities[Math.floor(Math.random() * cities.length)]}`;
+    default:
+      return {
+        name: names[Math.floor(Math.random() * names.length)],
+        email: `${names[Math.floor(Math.random() * names.length)].toLowerCase()}${Math.floor(Math.random() * 99)}@${domains[Math.floor(Math.random() * domains.length)]}`,
+        address: `${Math.floor(Math.random() * 999) + 1} ${streets[Math.floor(Math.random() * streets.length)]}, ${cities[Math.floor(Math.random() * cities.length)]}`
+      };
+  }
+}
+
+export function generateInvoiceNumber(prefix = 'INV') {
+  const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+  const suffix = Math.floor(1000 + Math.random() * 9000);
+  return `${prefix}-${timestamp}-${suffix}`;
+}
+
+export function generatePalette(seed = '#4f46e5') {
+  const base = seed.startsWith('#') ? seed.slice(1) : seed;
+  const rgb = base.length === 3 ? base.split('').map((char) => char + char).join('') : base;
+  const value = parseInt(rgb, 16);
+  const step = 60;
+  return [
+    `#${(value & 0x00ffffff).toString(16).padStart(6, '0')}`,
+    `#${((value >> 4) & 0x00ffffff).toString(16).padStart(6, '0')}`,
+    `#${((value >> 8) & 0x00ffffff).toString(16).padStart(6, '0')}`
+  ].map((color) => color.toUpperCase());
+}
+
+export function generateGradient(colors = ['#0ea5e9', '#8b5cf6']) {
+  return `linear-gradient(90deg, ${colors.join(', ')})`;
+}
+
+export function generateFavicon(text = 'SU') {
+  const safe = String(text || '').slice(0, 2).toUpperCase();
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="64" height="64" rx="16" fill="#111827"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#fff">${safe}</text></svg>` )}`;
+}
+
+export function checkPasswordStrength(password) {
+  const value = String(password || '');
+  let score = 0;
+  if (value.length >= 8) score += 1;
+  if (/[A-Z]/.test(value)) score += 1;
+  if (/[a-z]/.test(value)) score += 1;
+  if (/\d/.test(value)) score += 1;
+  if (/[^A-Za-z0-9]/.test(value)) score += 1;
+
+  let label = 'Weak';
+  if (score >= 4) label = 'Strong';
+  else if (score >= 3) label = 'Good';
+  else if (score >= 2) label = 'Fair';
+
+  return {
+    score,
+    label,
+    hasUppercase: /[A-Z]/.test(value),
+    hasLowercase: /[a-z]/.test(value),
+    hasNumber: /\d/.test(value),
+    hasSymbol: /[^A-Za-z0-9]/.test(value)
+  };
+}
+
+export async function generateHmac(secret, message, algorithm = 'SHA-256') {
+  const signature = await createHmacSignature(secret, message);
+  return {
+    algorithm,
+    signature
+  };
+}
+
+export async function generateJwt(payload, secret, algorithm = 'HS256') {
+  const header = { alg: algorithm, typ: 'JWT' };
+  const encodedPayload = encodeBase64Url(JSON.stringify(payload));
+  const encodedHeader = encodeBase64Url(JSON.stringify(header));
+  const unsigned = `${encodedHeader}.${encodedPayload}`;
+  const signature = await createHmacSignature(secret, unsigned);
+
+  return {
+    header,
+    payload,
+    token: `${unsigned}.${signature}`
+  };
+}
+
+export async function generateBcryptHash(value, saltRounds = 10) {
+  return {
+    hash: await bcrypt.hash(String(value), saltRounds),
+    saltRounds
+  };
+}
+
+export async function generateRsaKeyPair() {
+  const keyPair = await crypto.subtle.generateKey(
+    {
+      name: 'RSA-OAEP',
+      modulusLength: 2048,
+      publicExponent: new Uint8Array([1, 0, 1]),
+      hash: 'SHA-256'
+    },
+    true,
+    ['encrypt', 'decrypt']
+  );
+
+  const publicKey = await crypto.subtle.exportKey('spki', keyPair.publicKey);
+  const privateKey = await crypto.subtle.exportKey('pkcs8', keyPair.privateKey);
+
+  return {
+    publicKey: btoa(String.fromCharCode(...new Uint8Array(publicKey))),
+    privateKey: btoa(String.fromCharCode(...new Uint8Array(privateKey)))
+  };
+}
+
+export function csvToJson(text) {
+  const rows = splitCsvRows(text);
+  if (rows.length < 2) {
+    throw new Error('Enter at least a header row and one data row.');
+  }
+
+  const [headers, ...dataRows] = rows;
+  return dataRows.map((row) => headers.reduce((acc, header, index) => {
+    acc[header] = row[index] ?? '';
+    return acc;
+  }, {}));
+}
+
+export function jsonToCsv(data) {
+  return objectToCsv(data);
+}
+
+export function xmlToJson(text) {
+  return parseXmlToObject(text);
+}
+
+export function yamlToJson(text) {
+  return YAML.parse(text);
+}
+
+export function analyzeWordFrequency(text) {
+  const words = sanitizeText(text).split(/\s+/).filter(Boolean);
+  const frequency = words.reduce((acc, word) => {
+    acc[word] = (acc[word] || 0) + 1;
+    return acc;
+  }, {});
+
+  return Object.entries(frequency)
+    .sort(([, a], [, b]) => b - a)
+    .map(([word, count]) => ({ word, count }));
+}
+
+export function estimateReadingTime(text, wordsPerMinute = 200) {
+  const words = sanitizeText(text).split(/\s+/).filter(Boolean).length;
+  const minutes = Math.max(1, Math.ceil(words / wordsPerMinute));
+  return {
+    words,
+    minutes,
+    wordsPerMinute
+  };
+}
+
+export function isPalindrome(text) {
+  const normalized = sanitizeText(text).replace(/\s+/g, '');
+  const reversed = normalized.split('').reverse().join('');
+  return normalized === reversed;
 }
 
 export function numberToWords(value) {

@@ -876,6 +876,306 @@ export const utilityTools = [
     'client',
     [],
     defaultOutput('Volume result')
+  ),
+  createTool(
+    {
+      key: 'ip-lookup',
+      label: 'IP Address Lookup',
+      description: 'Look up your current public IP address.',
+      path: '/tools/utility/ip-lookup'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Public IP')
+  ),
+  createTool(
+    {
+      key: 'dns-lookup',
+      label: 'DNS Lookup',
+      description: 'Check DNS records for a hostname.',
+      path: '/tools/utility/dns-lookup'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('DNS records')
+  ),
+  createTool(
+    {
+      key: 'http-status',
+      label: 'HTTP Status Code Reference',
+      description: 'Look up the meaning of common HTTP status codes.',
+      path: '/tools/utility/http-status'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Status info')
+  ),
+  createTool(
+    {
+      key: 'user-agent',
+      label: 'User Agent Parser',
+      description: 'Parse browser and platform details from a user agent string.',
+      path: '/tools/utility/user-agent'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Parsed user agent')
+  ),
+  createTool(
+    {
+      key: 'ssl-checker',
+      label: 'SSL Certificate Checker',
+      description: 'Check whether a URL appears to use HTTPS.',
+      path: '/tools/utility/ssl-checker'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('SSL result')
+  ),
+  createTool(
+    {
+      key: 'ping',
+      label: 'Ping Tool (Simulated)',
+      description: 'Estimate simulated response latency for a host.',
+      path: '/tools/utility/ping'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Ping result')
+  ),
+  createTool(
+    {
+      key: 'qr-code',
+      label: 'QR Code Generator',
+      description: 'Generate a QR code image for your text.',
+      path: '/tools/utility/qr-code'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('QR code')
+  ),
+  createTool(
+    {
+      key: 'barcode',
+      label: 'Barcode Generator',
+      description: 'Generate a barcode image.',
+      path: '/tools/utility/barcode'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Barcode')
+  ),
+  createTool(
+    {
+      key: 'fake-data',
+      label: 'Fake Data Generator',
+      description: 'Create sample names, emails, and addresses.',
+      path: '/tools/utility/fake-data'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Generated data')
+  ),
+  createTool(
+    {
+      key: 'invoice-number',
+      label: 'Invoice Number Generator',
+      description: 'Generate a formatted invoice number.',
+      path: '/tools/utility/invoice-number'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Invoice number')
+  ),
+  createTool(
+    {
+      key: 'color-palette',
+      label: 'Color Palette Generator',
+      description: 'Generate a small palette from a seed color.',
+      path: '/tools/utility/color-palette'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Palette')
+  ),
+  createTool(
+    {
+      key: 'gradient',
+      label: 'Gradient Generator',
+      description: 'Create CSS gradients from color stops.',
+      path: '/tools/utility/gradient'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Gradient')
+  ),
+  createTool(
+    {
+      key: 'favicon',
+      label: 'Favicon Generator',
+      description: 'Generate a simple favicon from text.',
+      path: '/tools/utility/favicon'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Generated favicon')
+  ),
+  createTool(
+    {
+      key: 'password-strength',
+      label: 'Password Strength Checker',
+      description: 'Evaluate password complexity.',
+      path: '/tools/utility/password-strength'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Strength result')
+  ),
+  createTool(
+    {
+      key: 'hmac',
+      label: 'HMAC Generator',
+      description: 'Generate a SHA-256 HMAC signature.',
+      path: '/tools/utility/hmac'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('HMAC signature')
+  ),
+  createTool(
+    {
+      key: 'jwt',
+      label: 'JWT Generator',
+      description: 'Generate a signed JSON web token.',
+      path: '/tools/utility/jwt'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('JWT token')
+  ),
+  createTool(
+    {
+      key: 'bcrypt-hash',
+      label: 'Bcrypt Hash Generator',
+      description: 'Hash values with bcrypt.',
+      path: '/tools/utility/bcrypt-hash'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Hash result')
+  ),
+  createTool(
+    {
+      key: 'rsa-keygen',
+      label: 'RSA Key Pair Generator',
+      description: 'Generate RSA public and private keys.',
+      path: '/tools/utility/rsa-keygen'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('RSA keys')
+  ),
+  createTool(
+    {
+      key: 'csv-to-json',
+      label: 'CSV to JSON',
+      description: 'Convert CSV text into JSON objects.',
+      path: '/tools/utility/csv-to-json'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('JSON output')
+  ),
+  createTool(
+    {
+      key: 'json-to-csv',
+      label: 'JSON to CSV',
+      description: 'Convert JSON into CSV text.',
+      path: '/tools/utility/json-to-csv'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('CSV output')
+  ),
+  createTool(
+    {
+      key: 'xml-to-json',
+      label: 'XML to JSON',
+      description: 'Convert XML markup into JSON.',
+      path: '/tools/utility/xml-to-json'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('JSON output')
+  ),
+  createTool(
+    {
+      key: 'yaml-to-json',
+      label: 'YAML to JSON',
+      description: 'Convert YAML data into JSON.',
+      path: '/tools/utility/yaml-to-json'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('JSON output')
+  ),
+  createTool(
+    {
+      key: 'word-frequency',
+      label: 'Word Frequency Analyzer',
+      description: 'Count word frequency in text.',
+      path: '/tools/utility/word-frequency'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Word frequency')
+  ),
+  createTool(
+    {
+      key: 'reading-time',
+      label: 'Reading Time Estimator',
+      description: 'Estimate reading time for text.',
+      path: '/tools/utility/reading-time'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Reading estimate')
+  ),
+  createTool(
+    {
+      key: 'palindrome',
+      label: 'Palindrome Checker',
+      description: 'Check whether text reads the same forward and backward.',
+      path: '/tools/utility/palindrome'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Palindrome result')
   )
 ];
 

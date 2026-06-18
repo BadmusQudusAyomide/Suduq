@@ -2,6 +2,7 @@ import { Badge } from '../components/ui/badge';
 import { Card, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { convertIntegerBases, formatColorSummary, parseColorInput } from './dev-utils';
 import {
+  analyzeWordFrequency,
   calculateAge,
   calculateBMI,
   calculateCountdown,
@@ -14,17 +15,41 @@ import {
   calculateTip,
   calculateVolume,
   calculateWorkingDays,
+  checkPasswordStrength,
+  checkSslCertificate,
   convertFileSizeValue,
   convertTimezone,
   convertUnitValue,
+  csvToJson,
+  estimateReadingTime,
   fetchCurrencyConversion,
   fromRoman,
+  generateBarcode,
+  generateBcryptHash,
+  generateFakeData,
+  generateFavicon,
+  generateGradient,
+  generateHmac,
+  generateInvoiceNumber,
+  generateJwt,
+  generatePalette,
+  generateQrCode,
   generateRandomNumber,
+  generateRsaKeyPair,
+  getHttpStatusInfo,
+  getUnitGroups,
+  isPalindrome,
   isPrime,
+  jsonToCsv,
+  lookupDns,
+  lookupIpAddress,
   numberToWords,
+  parseUserAgent,
   scientificCalculator,
+  simulatePing,
   toRoman,
-  getUnitGroups
+  xmlToJson,
+  yamlToJson
 } from './utility-utils';
 
 function renderSummaryCards(items) {
@@ -890,6 +915,648 @@ export const utilityToolPageConfigs = {
     },
     onProcess: ({ shape, side, length, width, height, radius }) =>
       calculateVolume(shape, { side, length, width, height, radius })
+  },
+  'ip-lookup': {
+    title: 'IP Address Lookup',
+    description: 'Look up your current public IP address.',
+    fields: [],
+    outputLabel: 'Public IP',
+    outputDescription: 'The detected public IP details.',
+    renderOutput: ({ result }) => {
+      if (!result) {
+        return <p className="text-sm text-muted-foreground">Run the lookup to see your IP details.</p>;
+      }
+      return renderSummaryCards([
+        ['IP', result.ip]
+      ]);
+    },
+    onProcess: async () => lookupIpAddress()
+  },
+  'dns-lookup': {
+    title: 'DNS Lookup',
+    description: 'Check DNS records for a hostname.',
+    fields: [
+      {
+        name: 'hostname',
+        label: 'Hostname',
+        type: 'text',
+        defaultValue: 'example.com'
+      }
+    ],
+    outputLabel: 'DNS records',
+    outputDescription: 'The DNS response details.',
+    renderOutput: ({ result }) => {
+      if (!result) {
+        return <p className="text-sm text-muted-foreground">Enter a hostname to query DNS.</p>;
+      }
+      return (
+        <div className="space-y-3">
+          {result.answers.map((item) => (
+            <Card key={`${item.type}-${item.data}`}>
+              <CardHeader className="pb-2">
+                <CardDescription>{item.type} (TTL: {item.ttl})</CardDescription>
+                <CardTitle className="text-sm break-all">{item.data}</CardTitle>
+              </CardHeader>
+            </Card>
+          ))}
+        </div>
+      );
+    },
+    onProcess: ({ hostname }) => lookupDns(hostname)
+  },
+  'http-status': {
+    title: 'HTTP Status Code Reference',
+    description: 'Look up common HTTP status meanings.',
+    fields: [
+      {
+        name: 'code',
+        label: 'Status code',
+        type: 'number',
+        defaultValue: 200,
+        min: 100,
+        max: 599
+      }
+    ],
+    outputLabel: 'Status info',
+    outputDescription: 'Meaning and category for the code.',
+    renderOutput: ({ result }) => {
+      if (!result) {
+        return <p className="text-sm text-muted-foreground">Enter a status code.</p>;
+      }
+      return renderSummaryCards([
+        ['Code', result.code],
+        ['Message', result.message],
+        ['Category', result.category]
+      ]);
+    },
+    onProcess: ({ code }) => getHttpStatusInfo(Number(code))
+  },
+  'user-agent': {
+    title: 'User Agent Parser',
+    description: 'Inspect a user agent string and identify the browser and platform.',
+    fields: [
+      {
+        name: 'value',
+        label: 'User agent',
+        type: 'text',
+        defaultValue: navigator.userAgent
+      }
+    ],
+    outputLabel: 'Parsed user agent',
+    outputDescription: 'The browser and platform information.',
+    renderOutput: ({ result }) => {
+      if (!result) {
+        return <p className="text-sm text-muted-foreground">Enter a user agent string.</p>;
+      }
+      return renderSummaryCards([
+        ['Browser', result.browser],
+        ['Platform', result.platform],
+        ['Mobile', result.isMobile ? 'Yes' : 'No']
+      ]);
+    },
+    onProcess: ({ value }) => parseUserAgent(value)
+  },
+  'ssl-checker': {
+    title: 'SSL Certificate Checker',
+    description: 'Check whether a URL appears to use HTTPS and a secure setup.',
+    fields: [
+      {
+        name: 'url',
+        label: 'URL',
+        type: 'text',
+        defaultValue: 'https://example.com'
+      }
+    ],
+    outputLabel: 'SSL result',
+    outputDescription: 'The HTTPS and hostname information.',
+    renderOutput: ({ result }) => {
+      if (!result) {
+        return <p className="text-sm text-muted-foreground">Enter a URL to validate.</p>;
+      }
+      return renderSummaryCards([
+        ['URL', result.url],
+        ['Hostname', result.hostname || 'N/A'],
+        ['Status', result.status],
+        ['Secure', result.isSecure ? 'Yes' : 'No']
+      ]);
+    },
+    onProcess: ({ url }) => checkSslCertificate(url)
+  },
+  ping: {
+    title: 'Ping Tool (Simulated)',
+    description: 'Estimate a simulated latency for a host.',
+    fields: [
+      {
+        name: 'hostname',
+        label: 'Hostname',
+        type: 'text',
+        defaultValue: 'example.com'
+      }
+    ],
+    outputLabel: 'Ping result',
+    outputDescription: 'Latency and response status.',
+    renderOutput: ({ result }) => {
+      if (!result) {
+        return <p className="text-sm text-muted-foreground">Enter a hostname to simulate a ping.</p>;
+      }
+      return renderSummaryCards([
+        ['Host', result.host],
+        ['Latency', `${result.latency} ms`],
+        ['Status', result.status]
+      ]);
+    },
+    onProcess: ({ hostname }) => simulatePing(hostname)
+  },
+  'qr-code': {
+    title: 'QR Code Generator',
+    description: 'Generate a QR code for a given text value.',
+    fields: [
+      {
+        name: 'value',
+        label: 'Text',
+        type: 'text',
+        defaultValue: 'https://example.com'
+      },
+      {
+        name: 'size',
+        label: 'Size (px)',
+        type: 'number',
+        defaultValue: 300,
+        min: 120,
+        max: 800
+      }
+    ],
+    outputLabel: 'QR code',
+    outputDescription: 'The generated QR image.',
+    renderOutput: ({ result }) => {
+      if (!result) {
+        return <p className="text-sm text-muted-foreground">Enter text to create a QR code.</p>;
+      }
+      return <img src={result.imageUrl} alt="QR code" className="max-w-full rounded-md border" />;
+    },
+    onProcess: async ({ value, size }) => generateQrCode(value, Number(size))
+  },
+  barcode: {
+    title: 'Barcode Generator',
+    description: 'Create a barcode image for a code value.',
+    fields: [
+      {
+        name: 'value',
+        label: 'Code',
+        type: 'text',
+        defaultValue: '123456789012'
+      }
+    ],
+    outputLabel: 'Barcode',
+    outputDescription: 'The generated barcode image.',
+    renderOutput: ({ result }) => {
+      if (!result) {
+        return <p className="text-sm text-muted-foreground">Enter a code to generate a barcode.</p>;
+      }
+      return <img src={result.imageUrl} alt="Barcode" className="max-w-full rounded-md border" />;
+    },
+    onProcess: async ({ value }) => generateBarcode(value)
+  },
+  'fake-data': {
+    title: 'Fake Data Generator',
+    description: 'Create random sample names, emails, and addresses.',
+    fields: [
+      {
+        name: 'type',
+        label: 'Type',
+        type: 'select',
+        defaultValue: 'all',
+        options: [
+          { value: 'all', label: 'All' },
+          { value: 'name', label: 'Name' },
+          { value: 'email', label: 'Email' },
+          { value: 'address', label: 'Address' }
+        ]
+      }
+    ],
+    outputLabel: 'Generated data',
+    outputDescription: 'A sample value or object.',
+    renderOutput: ({ result }) => {
+      if (!result) {
+        return <p className="text-sm text-muted-foreground">Choose a type to generate sample data.</p>;
+      }
+      return <pre className="whitespace-pre-wrap text-sm">{typeof result === 'string' ? result : JSON.stringify(result, null, 2)}</pre>;
+    },
+    onProcess: ({ type }) => generateFakeData(type)
+  },
+  'invoice-number': {
+    title: 'Invoice Number Generator',
+    description: 'Create a formatted invoice number.',
+    fields: [
+      {
+        name: 'prefix',
+        label: 'Prefix',
+        type: 'text',
+        defaultValue: 'INV'
+      }
+    ],
+    outputLabel: 'Invoice number',
+    outputDescription: 'The generated number.',
+    renderOutput: ({ result }) => {
+      if (!result) {
+        return <p className="text-sm text-muted-foreground">Enter a prefix to generate an invoice code.</p>;
+      }
+      return renderSummaryCards([['Invoice', result]]);
+    },
+    onProcess: ({ prefix }) => generateInvoiceNumber(prefix)
+  },
+  'color-palette': {
+    title: 'Color Palette Generator',
+    description: 'Generate a small palette from a seed color.',
+    fields: [
+      {
+        name: 'seed',
+        label: 'Seed color',
+        type: 'text',
+        defaultValue: '#4f46e5'
+      }
+    ],
+    outputLabel: 'Palette',
+    outputDescription: 'A few generated colors.',
+    renderOutput: ({ result }) => {
+      if (!result) {
+        return <p className="text-sm text-muted-foreground">Enter a seed color.</p>;
+      }
+      return (
+        <div className="flex flex-wrap gap-2">
+          {result.map((color) => (
+            <div key={color} className="flex items-center gap-2 rounded-md border p-2">
+              <div className="h-10 w-10 rounded-md" style={{ backgroundColor: color }} />
+              <span className="text-sm font-medium">{color}</span>
+            </div>
+          ))}
+        </div>
+      );
+    },
+    onProcess: ({ seed }) => generatePalette(seed)
+  },
+  gradient: {
+    title: 'Gradient Generator',
+    description: 'Create a CSS gradient string from color stops.',
+    fields: [
+      {
+        name: 'colors',
+        label: 'Colors (comma separated)',
+        type: 'text',
+        defaultValue: '#0ea5e9, #8b5cf6'
+      }
+    ],
+    outputLabel: 'Gradient',
+    outputDescription: 'The computed gradient CSS.',
+    renderOutput: ({ result }) => {
+      if (!result) {
+        return <p className="text-sm text-muted-foreground">Enter colors to build a gradient.</p>;
+      }
+      return (
+        <div className="space-y-3">
+          <div className="h-24 rounded-md border" style={{ background: result }} />
+          <pre className="whitespace-pre-wrap text-sm">{result}</pre>
+        </div>
+      );
+    },
+    onProcess: ({ colors }) => generateGradient(String(colors).split(',').map((item) => item.trim()).filter(Boolean))
+  },
+  favicon: {
+    title: 'Favicon Generator',
+    description: 'Generate a simple favicon from short text.',
+    fields: [
+      {
+        name: 'text',
+        label: 'Text',
+        type: 'text',
+        defaultValue: 'SU'
+      }
+    ],
+    outputLabel: 'Generated favicon',
+    outputDescription: 'The favicon preview and data URL.',
+    renderOutput: ({ result }) => {
+      if (!result) {
+        return <p className="text-sm text-muted-foreground">Enter text to generate a favicon.</p>;
+      }
+      return (
+        <div className="space-y-3">
+          <img src={result} alt="Generated favicon" className="h-16 w-16 rounded-md border bg-white" />
+          <pre className="whitespace-pre-wrap text-sm break-all">{result}</pre>
+        </div>
+      );
+    },
+    onProcess: ({ text }) => generateFavicon(text)
+  },
+  'password-strength': {
+    title: 'Password Strength Checker',
+    description: 'Score a password and check its complexity.',
+    fields: [
+      {
+        name: 'password',
+        label: 'Password',
+        type: 'text',
+        defaultValue: 'Sample@123'
+      }
+    ],
+    outputLabel: 'Strength result',
+    outputDescription: 'The password quality details.',
+    renderOutput: ({ result }) => {
+      if (!result) {
+        return <p className="text-sm text-muted-foreground">Enter a password to check its strength.</p>;
+      }
+      return renderSummaryCards([
+        ['Score', result.score],
+        ['Label', result.label],
+        ['Uppercase', result.hasUppercase ? 'Yes' : 'No'],
+        ['Lowercase', result.hasLowercase ? 'Yes' : 'No'],
+        ['Number', result.hasNumber ? 'Yes' : 'No'],
+        ['Symbol', result.hasSymbol ? 'Yes' : 'No']
+      ]);
+    },
+    onProcess: ({ password }) => checkPasswordStrength(password)
+  },
+  hmac: {
+    title: 'HMAC Generator',
+    description: 'Generate a SHA-256 HMAC from a secret and message.',
+    fields: [
+      {
+        name: 'secret',
+        label: 'Secret',
+        type: 'text',
+        defaultValue: 'secret-key'
+      },
+      {
+        name: 'message',
+        label: 'Message',
+        type: 'text',
+        defaultValue: 'hello'
+      }
+    ],
+    outputLabel: 'HMAC signature',
+    outputDescription: 'The generated signature value.',
+    renderOutput: ({ result }) => {
+      if (!result) {
+        return <p className="text-sm text-muted-foreground">Enter a secret and message to generate an HMAC.</p>;
+      }
+      return renderSummaryCards([
+        ['Algorithm', result.algorithm],
+        ['Signature', result.signature]
+      ]);
+    },
+    onProcess: async ({ secret, message }) => generateHmac(secret, message)
+  },
+  jwt: {
+    title: 'JWT Generator',
+    description: 'Create a signed JWT from payload and secret.',
+    fields: [
+      {
+        name: 'payload',
+        label: 'Payload (JSON)',
+        type: 'textarea',
+        defaultValue: '{"sub":"123","name":"Jane"}'
+      },
+      {
+        name: 'secret',
+        label: 'Secret',
+        type: 'text',
+        defaultValue: 'secret'
+      }
+    ],
+    outputLabel: 'JWT token',
+    outputDescription: 'The generated token and metadata.',
+    renderOutput: ({ result }) => {
+      if (!result) {
+        return <p className="text-sm text-muted-foreground">Enter JSON payload and secret.</p>;
+      }
+      return (
+        <div className="space-y-3">
+          <pre className="whitespace-pre-wrap text-sm">{result.token}</pre>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {renderSummaryCards([
+              ['Algorithm', result.header.alg],
+              ['Type', result.header.typ]
+            ])}
+          </div>
+        </div>
+      );
+    },
+    onProcess: async ({ payload, secret }) => {
+      const parsed = JSON.parse(payload || '{}');
+      return generateJwt(parsed, secret);
+    }
+  },
+  'bcrypt-hash': {
+    title: 'Bcrypt Hash Generator',
+    description: 'Create a bcrypt hash for a secret value.',
+    fields: [
+      {
+        name: 'value',
+        label: 'Value',
+        type: 'text',
+        defaultValue: 'secret'
+      },
+      {
+        name: 'saltRounds',
+        label: 'Salt rounds',
+        type: 'number',
+        defaultValue: 10,
+        min: 4,
+        max: 15
+      }
+    ],
+    outputLabel: 'Hash result',
+    outputDescription: 'The bcrypt hash and salt rounds.',
+    renderOutput: ({ result }) => {
+      if (!result) {
+        return <p className="text-sm text-muted-foreground">Enter a value to hash.</p>;
+      }
+      return renderSummaryCards([
+        ['Salt rounds', result.saltRounds],
+        ['Hash', result.hash]
+      ]);
+    },
+    onProcess: async ({ value, saltRounds }) => generateBcryptHash(value, Number(saltRounds))
+  },
+  'rsa-keygen': {
+    title: 'RSA Key Pair Generator',
+    description: 'Generate RSA public and private keys.',
+    fields: [],
+    outputLabel: 'RSA keys',
+    outputDescription: 'Public and private key values.',
+    renderOutput: ({ result }) => {
+      if (!result) {
+        return <p className="text-sm text-muted-foreground">Generate a key pair to view the keys.</p>;
+      }
+      return (
+        <div className="space-y-3">
+          <pre className="whitespace-pre-wrap text-sm break-all">{result.publicKey}</pre>
+          <pre className="whitespace-pre-wrap text-sm break-all">{result.privateKey}</pre>
+        </div>
+      );
+    },
+    onProcess: async () => generateRsaKeyPair()
+  },
+  'csv-to-json': {
+    title: 'CSV to JSON',
+    description: 'Convert CSV text into JSON objects.',
+    fields: [
+      {
+        name: 'value',
+        label: 'CSV',
+        type: 'textarea',
+        defaultValue: 'name,email\nJane,jane@example.com\nJohn,john@example.com'
+      }
+    ],
+    outputLabel: 'JSON output',
+    outputDescription: 'The converted JSON data.',
+    renderOutput: ({ result }) => {
+      if (!result) {
+        return <p className="text-sm text-muted-foreground">Enter CSV text to convert it.</p>;
+      }
+      return <pre className="whitespace-pre-wrap text-sm">{JSON.stringify(result, null, 2)}</pre>;
+    },
+    onProcess: ({ value }) => csvToJson(value)
+  },
+  'json-to-csv': {
+    title: 'JSON to CSV',
+    description: 'Convert a JSON array or object into CSV.',
+    fields: [
+      {
+        name: 'value',
+        label: 'JSON',
+        type: 'textarea',
+        defaultValue: '[{"name":"Jane","email":"jane@example.com"},{"name":"John","email":"john@example.com"}]'
+      }
+    ],
+    outputLabel: 'CSV output',
+    outputDescription: 'The converted CSV text.',
+    renderOutput: ({ result }) => {
+      if (!result) {
+        return <p className="text-sm text-muted-foreground">Enter JSON to convert it.</p>;
+      }
+      return <pre className="whitespace-pre-wrap text-sm">{result}</pre>;
+    },
+    onProcess: ({ value }) => jsonToCsv(JSON.parse(value))
+  },
+  'xml-to-json': {
+    title: 'XML to JSON',
+    description: 'Convert XML markup into a JSON object.',
+    fields: [
+      {
+        name: 'value',
+        label: 'XML',
+        type: 'textarea',
+        defaultValue: '<root><name>Jane</name><email>jane@example.com</email></root>'
+      }
+    ],
+    outputLabel: 'JSON output',
+    outputDescription: 'The parsed XML result.',
+    renderOutput: ({ result }) => {
+      if (!result) {
+        return <p className="text-sm text-muted-foreground">Enter XML to convert it.</p>;
+      }
+      return <pre className="whitespace-pre-wrap text-sm">{JSON.stringify(result, null, 2)}</pre>;
+    },
+    onProcess: ({ value }) => xmlToJson(value)
+  },
+  'yaml-to-json': {
+    title: 'YAML to JSON',
+    description: 'Convert YAML text into a JSON object.',
+    fields: [
+      {
+        name: 'value',
+        label: 'YAML',
+        type: 'textarea',
+        defaultValue: 'name: Jane\nemail: jane@example.com'
+      }
+    ],
+    outputLabel: 'JSON output',
+    outputDescription: 'The parsed YAML result.',
+    renderOutput: ({ result }) => {
+      if (!result) {
+        return <p className="text-sm text-muted-foreground">Enter YAML to convert it.</p>;
+      }
+      return <pre className="whitespace-pre-wrap text-sm">{JSON.stringify(result, null, 2)}</pre>;
+    },
+    onProcess: ({ value }) => yamlToJson(value)
+  },
+  'word-frequency': {
+    title: 'Word Frequency Analyzer',
+    description: 'Count the frequency of words in text.',
+    fields: [
+      {
+        name: 'value',
+        label: 'Text',
+        type: 'textarea',
+        defaultValue: 'apple banana apple orange'
+      }
+    ],
+    outputLabel: 'Word frequency',
+    outputDescription: 'The most frequent words.',
+    renderOutput: ({ result }) => {
+      if (!result) {
+        return <p className="text-sm text-muted-foreground">Enter text to analyze word frequency.</p>;
+      }
+      return (
+        <div className="space-y-2">
+          {result.map((item) => (
+            <Card key={item.word}>
+              <CardHeader className="pb-2">
+                <CardDescription>{item.word}</CardDescription>
+                <CardTitle>{item.count}</CardTitle>
+              </CardHeader>
+            </Card>
+          ))}
+        </div>
+      );
+    },
+    onProcess: ({ value }) => analyzeWordFrequency(value)
+  },
+  'reading-time': {
+    title: 'Reading Time Estimator',
+    description: 'Estimate how long it will take to read text.',
+    fields: [
+      {
+        name: 'value',
+        label: 'Text',
+        type: 'textarea',
+        defaultValue: 'This is a sample paragraph to estimate reading time.'
+      }
+    ],
+    outputLabel: 'Reading estimate',
+    outputDescription: 'Words and estimated minutes.',
+    renderOutput: ({ result }) => {
+      if (!result) {
+        return <p className="text-sm text-muted-foreground">Enter text to estimate reading time.</p>;
+      }
+      return renderSummaryCards([
+        ['Words', result.words],
+        ['Minutes', result.minutes],
+        ['Words per minute', result.wordsPerMinute]
+      ]);
+    },
+    onProcess: ({ value }) => estimateReadingTime(value)
+  },
+  palindrome: {
+    title: 'Palindrome Checker',
+    description: 'Check whether text reads the same forward and backward.',
+    fields: [
+      {
+        name: 'value',
+        label: 'Text',
+        type: 'text',
+        defaultValue: 'level'
+      }
+    ],
+    outputLabel: 'Palindrome result',
+    outputDescription: 'Whether the text is a palindrome.',
+    renderOutput: ({ result }) => {
+      if (result === undefined || result === null) {
+        return <p className="text-sm text-muted-foreground">Enter text to check if it is a palindrome.</p>;
+      }
+      return renderSummaryCards([['Result', result ? 'Yes' : 'No']]);
+    },
+    onProcess: ({ value }) => isPalindrome(value)
   }
 };
 
