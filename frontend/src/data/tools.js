@@ -684,6 +684,198 @@ export const utilityTools = [
     'client',
     [],
     defaultOutput('Color values')
+  ),
+  createTool(
+    {
+      key: 'age-calculator',
+      label: 'Age Calculator',
+      description: 'Calculate age from a date of birth.',
+      path: '/tools/utility/age-calculator'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Age result')
+  ),
+  createTool(
+    {
+      key: 'date-difference',
+      label: 'Date Difference Calculator',
+      description: 'Compare two dates and see the difference in days.',
+      path: '/tools/utility/date-difference'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Date difference')
+  ),
+  createTool(
+    {
+      key: 'timezone',
+      label: 'Timezone Converter',
+      description: 'Convert dates and times between timezones.',
+      path: '/tools/utility/timezone'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Timezone result')
+  ),
+  createTool(
+    {
+      key: 'countdown',
+      label: 'Countdown Timer',
+      description: 'Track time remaining until a target date.',
+      path: '/tools/utility/countdown'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Countdown')
+  ),
+  createTool(
+    {
+      key: 'working-days',
+      label: 'Working Days Calculator',
+      description: 'Count business days while skipping weekends and holidays.',
+      path: '/tools/utility/working-days'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Working days')
+  ),
+  createTool(
+    {
+      key: 'percentage',
+      label: 'Percentage Calculator',
+      description: 'Calculate percentages and comparisons quickly.',
+      path: '/tools/utility/percentage'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Percentage result')
+  ),
+  createTool(
+    {
+      key: 'scientific',
+      label: 'Scientific Calculator',
+      description: 'Run core math operations on numeric inputs.',
+      path: '/tools/utility/scientific'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Result')
+  ),
+  createTool(
+    {
+      key: 'bmi',
+      label: 'BMI Calculator',
+      description: 'Estimate BMI from weight and height.',
+      path: '/tools/utility/bmi'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('BMI result')
+  ),
+  createTool(
+    {
+      key: 'tip',
+      label: 'Tip Calculator',
+      description: 'Calculate tips and split bills across people.',
+      path: '/tools/utility/tip'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Tip result')
+  ),
+  createTool(
+    {
+      key: 'loan-emi',
+      label: 'Loan / EMI Calculator',
+      description: 'Estimate EMIs and total loan costs.',
+      path: '/tools/utility/loan-emi'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('EMI result')
+  ),
+  createTool(
+    {
+      key: 'prime',
+      label: 'Prime Number Checker',
+      description: 'Check whether a number is prime.',
+      path: '/tools/utility/prime'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Prime result')
+  ),
+  createTool(
+    {
+      key: 'gcd-lcm',
+      label: 'GCD & LCM Calculator',
+      description: 'Find greatest common divisors and least common multiples.',
+      path: '/tools/utility/gcd-lcm'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('GCD / LCM')
+  ),
+  createTool(
+    {
+      key: 'random-number',
+      label: 'Random Number Generator',
+      description: 'Generate random integers in a chosen range.',
+      path: '/tools/utility/random-number'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Random numbers')
+  ),
+  createTool(
+    {
+      key: 'area',
+      label: 'Area Calculator',
+      description: 'Calculate area and perimeter for common shapes.',
+      path: '/tools/utility/area'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Area result')
+  ),
+  createTool(
+    {
+      key: 'pythagorean',
+      label: 'Pythagorean Theorem Solver',
+      description: 'Solve right triangle values from side lengths.',
+      path: '/tools/utility/pythagorean'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Right triangle result')
+  ),
+  createTool(
+    {
+      key: 'volume',
+      label: 'Volume Calculator',
+      description: 'Calculate volume for common 3D shapes.',
+      path: '/tools/utility/volume'
+    },
+    'utility',
+    'client',
+    [],
+    defaultOutput('Volume result')
   )
 ];
 

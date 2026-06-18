@@ -221,6 +221,413 @@ export function fromRoman(value) {
   return total;
 }
 
+export function calculateAge(dateOfBirth) {
+  const birthDate = new Date(dateOfBirth);
+
+  if (Number.isNaN(birthDate.getTime())) {
+    throw new Error('Enter a valid date of birth.');
+  }
+
+  const today = new Date();
+  let years = today.getFullYear() - birthDate.getFullYear();
+  let months = today.getMonth() - birthDate.getMonth();
+  let days = today.getDate() - birthDate.getDate();
+
+  if (days < 0) {
+    months -= 1;
+    const previousMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+    days += previousMonth.getDate();
+  }
+
+  if (months < 0) {
+    years -= 1;
+    months += 12;
+  }
+
+  return {
+    years,
+    months,
+    days,
+    birthday: birthDate.toISOString().slice(0, 10)
+  };
+}
+
+export function calculateDateDifference(startDate, endDate) {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    throw new Error('Enter valid start and end dates.');
+  }
+
+  const diffMs = end.getTime() - start.getTime();
+  const totalDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  return {
+    totalDays,
+    totalWeeks: round(totalDays / 7, 2),
+    isFuture: diffMs > 0
+  };
+}
+
+export function convertTimezone(input, fromTimeZone, toTimeZone) {
+  const date = new Date(input);
+
+  if (Number.isNaN(date.getTime())) {
+    throw new Error('Enter a valid date and time.');
+  }
+
+  const format = (value, timeZone) =>
+    new Intl.DateTimeFormat('en-GB', {
+      dateStyle: 'medium',
+      timeStyle: 'long',
+      timeZone
+    }).format(new Date(value));
+
+  return {
+    input: date.toISOString(),
+    from: format(date, fromTimeZone),
+    to: format(date, toTimeZone)
+  };
+}
+
+export function calculateCountdown(targetDate) {
+  const target = new Date(targetDate);
+
+  if (Number.isNaN(target.getTime())) {
+    throw new Error('Enter a valid countdown date.');
+  }
+
+  const now = Date.now();
+  const diff = target.getTime() - now;
+
+  const totalSeconds = Math.max(0, Math.floor(diff / 1000));
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  return {
+    totalSeconds,
+    days,
+    hours,
+    minutes,
+    seconds,
+    isComplete: diff <= 0
+  };
+}
+
+export function calculateWorkingDays(startDate, endDate, holidays = '') {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    throw new Error('Enter valid dates.');
+  }
+
+  const normalizedEnd = end.getTime() < start.getTime() ? start : end;
+  const normalizedStart = end.getTime() < start.getTime() ? end : start;
+  const holidaySet = new Set(
+    String(holidays || '')
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .map((item) => new Date(item).toDateString())
+  );
+
+  let days = 0;
+  for (
+    let current = new Date(normalizedStart);
+    current <= normalizedEnd;
+    current.setDate(current.getDate() + 1)
+  ) {
+    const day = current.getDay();
+    const dateKey = current.toDateString();
+
+    if (day !== 0 && day !== 6 && !holidaySet.has(dateKey)) {
+      days += 1;
+    }
+  }
+
+  return {
+    workingDays: days,
+    startDate: normalizedStart.toISOString().slice(0, 10),
+    endDate: normalizedEnd.toISOString().slice(0, 10)
+  };
+}
+
+export function calculatePercentage(value, percent) {
+  const numericValue = Number(value);
+  const numericPercent = Number(percent);
+
+  if (!Number.isFinite(numericValue) || !Number.isFinite(numericPercent)) {
+    throw new Error('Enter valid numeric values.');
+  }
+
+  return {
+    percentOfValue: numericValue * (numericPercent / 100),
+    valuePlusPercent: numericValue + numericValue * (numericPercent / 100),
+    valueMinusPercent: numericValue - numericValue * (numericPercent / 100)
+  };
+}
+
+export function scientificCalculator(value1, value2, operator) {
+  const number1 = Number(value1);
+  const number2 = Number(value2);
+
+  if (!Number.isFinite(number1)) {
+    throw new Error('Enter a valid first number.');
+  }
+
+  switch (operator) {
+    case 'add':
+      return number1 + number2;
+    case 'subtract':
+      return number1 - number2;
+    case 'multiply':
+      return number1 * number2;
+    case 'divide':
+      if (number2 === 0) {
+        throw new Error('Cannot divide by zero.');
+      }
+      return number1 / number2;
+    case 'power':
+      return number1 ** number2;
+    case 'sqrt':
+      if (number1 < 0) {
+        throw new Error('Square root is not defined for negative values.');
+      }
+      return Math.sqrt(number1);
+    default:
+      throw new Error('Unsupported operator.');
+  }
+}
+
+export function calculateBMI(weightKg, heightCm) {
+  const weight = Number(weightKg);
+  const height = Number(heightCm) / 100;
+
+  if (!Number.isFinite(weight) || !Number.isFinite(height) || height <= 0) {
+    throw new Error('Enter valid weight and height values.');
+  }
+
+  const bmi = weight / (height * height);
+
+  let category = 'Normal';
+  if (bmi < 18.5) {
+    category = 'Underweight';
+  } else if (bmi < 25) {
+    category = 'Normal';
+  } else if (bmi < 30) {
+    category = 'Overweight';
+  } else {
+    category = 'Obese';
+  }
+
+  return {
+    bmi: round(bmi, 2),
+    category
+  };
+}
+
+export function calculateTip(bill, tipPercent, people) {
+  const billAmount = Number(bill);
+  const tip = Number(tipPercent);
+  const split = Number(people);
+
+  if (!Number.isFinite(billAmount) || billAmount < 0 || !Number.isFinite(tip) || tip < 0 || !Number.isFinite(split) || split <= 0) {
+    throw new Error('Enter valid bill, tip, and people values.');
+  }
+
+  const tipAmount = billAmount * (tip / 100);
+  const total = billAmount + tipAmount;
+
+  return {
+    tipAmount: round(tipAmount, 2),
+    total: round(total, 2),
+    perPerson: round(total / split, 2)
+  };
+}
+
+export function calculateLoanEmi(principal, annualRate, years) {
+  const principalAmount = Number(principal);
+  const rate = Number(annualRate) / 100 / 12;
+  const months = Number(years) * 12;
+
+  if (
+    !Number.isFinite(principalAmount) ||
+    principalAmount <= 0 ||
+    !Number.isFinite(rate) ||
+    rate < 0 ||
+    !Number.isFinite(months) ||
+    months <= 0
+  ) {
+    throw new Error('Enter valid loan details.');
+  }
+
+  if (rate === 0) {
+    return {
+      emi: round(principalAmount / months, 2),
+      totalPayment: round(principalAmount, 2),
+      totalInterest: 0
+    };
+  }
+
+  const emi = (principalAmount * rate * (1 + rate) ** months) / ((1 + rate) ** months - 1);
+  return {
+    emi: round(emi, 2),
+    totalPayment: round(emi * months, 2),
+    totalInterest: round(emi * months - principalAmount, 2)
+  };
+}
+
+export function isPrime(value) {
+  const number = Number(value);
+  if (!Number.isInteger(number) || number < 2) {
+    return false;
+  }
+
+  for (let divider = 2; divider <= Math.sqrt(number); divider += 1) {
+    if (number % divider === 0) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+export function calculateGcdLcm(a, b) {
+  const first = Number(a);
+  const second = Number(b);
+
+  if (!Number.isInteger(first) || !Number.isInteger(second) || first === 0 || second === 0) {
+    throw new Error('Enter non-zero integers.');
+  }
+
+  const gcd = (() => {
+    let x = Math.abs(first);
+    let y = Math.abs(second);
+    while (y) {
+      const temp = y;
+      y = x % y;
+      x = temp;
+    }
+    return x;
+  })();
+
+  const lcm = (Math.abs(first) * Math.abs(second)) / gcd;
+
+  return { gcd, lcm };
+}
+
+export function generateRandomNumber(min, max, count = 1) {
+  const minValue = Number(min);
+  const maxValue = Number(max);
+  const countValue = Number(count);
+
+  if (!Number.isFinite(minValue) || !Number.isFinite(maxValue) || minValue > maxValue || !Number.isFinite(countValue) || countValue <= 0) {
+    throw new Error('Enter valid range and count values.');
+  }
+
+  const numbers = [];
+  for (let index = 0; index < countValue; index += 1) {
+    const value = Math.floor(Math.random() * (maxValue - minValue + 1)) + minValue;
+    numbers.push(value);
+  }
+  return {
+    numbers,
+    count: numbers.length
+  };
+}
+
+export function calculateGeometry(shape, values) {
+  const numberValues = Object.fromEntries(
+    Object.entries(values).map(([key, value]) => [key, Number(value)])
+  );
+
+  switch (shape) {
+    case 'circle':
+      if (!Number.isFinite(numberValues.radius) || numberValues.radius < 0) {
+        throw new Error('Enter a valid radius.');
+      }
+      return {
+        area: round(Math.PI * numberValues.radius ** 2, 4),
+        perimeter: round(2 * Math.PI * numberValues.radius, 4)
+      };
+    case 'rectangle':
+      if (!Number.isFinite(numberValues.length) || !Number.isFinite(numberValues.width) || numberValues.length < 0 || numberValues.width < 0) {
+        throw new Error('Enter valid length and width.');
+      }
+      return {
+        area: round(numberValues.length * numberValues.width, 4),
+        perimeter: round(2 * (numberValues.length + numberValues.width), 4)
+      };
+    case 'triangle':
+      if (!Number.isFinite(numberValues.base) || !Number.isFinite(numberValues.height) || numberValues.base < 0 || numberValues.height < 0) {
+        throw new Error('Enter valid base and height.');
+      }
+      return {
+        area: round((numberValues.base * numberValues.height) / 2, 4),
+        perimeter: null
+      };
+    case 'square':
+      if (!Number.isFinite(numberValues.side) || numberValues.side < 0) {
+        throw new Error('Enter a valid side length.');
+      }
+      return {
+        area: round(numberValues.side ** 2, 4),
+        perimeter: round(4 * numberValues.side, 4)
+      };
+    default:
+      throw new Error('Unsupported geometry shape.');
+  }
+}
+
+export function calculatePythagorean(a, b) {
+  const first = Number(a);
+  const second = Number(b);
+
+  if (!Number.isFinite(first) || !Number.isFinite(second) || first < 0 || second < 0) {
+    throw new Error('Enter valid side lengths.');
+  }
+
+  return {
+    hypotenuse: round(Math.sqrt(first ** 2 + second ** 2), 4),
+    area: round((first * second) / 2, 4)
+  };
+}
+
+export function calculateVolume(shape, values) {
+  const numberValues = Object.fromEntries(
+    Object.entries(values).map(([key, value]) => [key, Number(value)])
+  );
+
+  switch (shape) {
+    case 'cube':
+      if (!Number.isFinite(numberValues.side) || numberValues.side < 0) {
+        throw new Error('Enter a valid side length.');
+      }
+      return { volume: round(numberValues.side ** 3, 4) };
+    case 'cuboid':
+      if (!Number.isFinite(numberValues.length) || !Number.isFinite(numberValues.width) || !Number.isFinite(numberValues.height) || numberValues.length < 0 || numberValues.width < 0 || numberValues.height < 0) {
+        throw new Error('Enter valid dimensions.');
+      }
+      return { volume: round(numberValues.length * numberValues.width * numberValues.height, 4) };
+    case 'sphere':
+      if (!Number.isFinite(numberValues.radius) || numberValues.radius < 0) {
+        throw new Error('Enter a valid radius.');
+      }
+      return { volume: round((4 / 3) * Math.PI * numberValues.radius ** 3, 4) };
+    case 'cylinder':
+      if (!Number.isFinite(numberValues.radius) || !Number.isFinite(numberValues.height) || numberValues.radius < 0 || numberValues.height < 0) {
+        throw new Error('Enter valid radius and height.');
+      }
+      return { volume: round(Math.PI * numberValues.radius ** 2 * numberValues.height, 4) };
+    default:
+      throw new Error('Unsupported volume shape.');
+  }
+}
+
 export function numberToWords(value) {
   const numeric = Number(value);
 
